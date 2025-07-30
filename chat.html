@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TravelBuddy - India Travel Assistant</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #45a049;
+            --dark-color: #333;
+            --light-color: #f4f4f4;
+            --sidebar-width: 300px;
+            --header-height: 60px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+        
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .sidebar-header {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            font-weight: bold;
+            font-size: 18px;
+            color: var(--dark-color);
+        }
+        
+        .chat-history {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .chat-item {
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .chat-item:hover {
+            background-color: var(--light-color);
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .chat-header {
+            height: var(--header-height);
+            background-color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .back-button {
+            margin-right: 15px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        
+        .chat-title {
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .chat-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            line-height: 1.4;
+            position: relative;
+        }
+        
+        .user-message {
+            background-color: var(--primary-color);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .bot-message {
+            background-color: white;
+            color: var(--dark-color);
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .input-container {
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+            font-size: 16px;
+        }
+        
+        .send-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+        
+        .send-button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .timestamp {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+            text-align: right;
+        }
+        
+        .typing-indicator {
+            display: flex;
+            padding: 10px 15px;
+            background-color: white;
+            border-radius: 18px;
+            margin-bottom: 15px;
+            width: fit-content;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #aaa;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typingAnimation 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typingAnimation {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: absolute;
+                z-index: 10;
+                height: 100%;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .back-button {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            Chat History
+        </div>
+        <div class="chat-history" id="chatHistory">
+            <!-- Chat history items will be added here -->
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="chat-header">
+            <div class="back-button" id="backButton">←</div>
+            <div class="chat-title">TravelBuddy</div>
+        </div>
+        
+        <div class="chat-container" id="chatContainer">
+            <!-- Messages will be added here -->
+        </div>
+        
+        <div class="input-container">
+            <input type="text" class="message-input" id="messageInput" placeholder="Ask about travel in India..." autocomplete="off">
+            <button class="send-button" id="sendButton">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            const chatHistory = document.getElementById('chatHistory');
+            const sidebar = document.getElementById('sidebar');
+            const backButton = document.getElementById('backButton');
+            
+            let conversations = [];
+            let currentConversation = [];
+            
+            // Initialize with welcome message
+            setTimeout(() => {
+                addBotMessage("Hello! I'm TravelBuddy, your personal travel assistant for India. I can help you with travel plans, budget trips, hotel information, and details about Indian destinations. How can I assist you today?");
+            }, 500);
+            
+            // Send message function
+            function sendMessage() {
+                const message = messageInput.value.trim();
+                if (message === '') return;
+                
+                addUserMessage(message);
+                messageInput.value = '';
+                
+                // Show typing indicator
+                const typingIndicator = document.createElement('div');
+                typingIndicator.className = 'typing-indicator';
+                typingIndicator.innerHTML = `
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                `;
+                chatContainer.appendChild(typingIndicator);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                
+                // Simulate bot thinking
+                setTimeout(() => {
+                    chatContainer.removeChild(typingIndicator);
+                    const response = generateResponse(message);
+                    addBotMessage(response);
+                }, 1000 + Math.random() * 2000);
+            }
+            
+            // Add user message to chat
+            function addUserMessage(text) {
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message user-message';
+                messageElement.textContent = text;
+                
+                const timestamp = document.createElement('div');
+                timestamp.className = 'timestamp';
+                timestamp.textContent = getCurrentTime();
+                
+                messageElement.appendChild(timestamp);
+                chatContainer.appendChild(messageElement);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                
+                // Add to current conversation
+                currentConversation.push({
+                    sender: 'user',
+                    text: text,
+                    time: new Date()
+                });
+                
+                // Add to chat history if it's the first message
+                if (currentConversation.length === 1) {
+                    addToChatHistory(text);
+                }
+            }
+            
+            // Add bot message to chat
+            function addBotMessage(text) {
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message bot-message';
+                messageElement.textContent = text;
+                
+                const timestamp = document.createElement('div');
+                timestamp.className = 'timestamp';
+                timestamp.textContent = getCurrentTime();
+                
+                messageElement.appendChild(timestamp);
+                chatContainer.appendChild(messageElement);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                
+                // Add to current conversation
+                currentConversation.push({
+                    sender: 'bot',
+                    text: text,
+                    time: new Date()
+                });
+                
+                // Save conversation if it's complete
+                if (currentConversation.length >= 2) {
+                    conversations.push([...currentConversation]);
+                    currentConversation = [];
+                }
+            }
+            
+            // Add to chat history sidebar
+            function addToChatHistory(text) {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'chat-item';
+                historyItem.textContent = text.length > 30 ? text.substring(0, 30) + '...' : text;
+                
+                historyItem.addEventListener('click', () => {
+                    // Load conversation when clicked
+                    // This would require more complex state management
+                    // For now, just show a message
+                    addBotMessage("You asked previously: " + text);
+                });
+                
+                chatHistory.appendChild(historyItem);
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            }
+            
+            // Get current time in HH:MM format
+            function getCurrentTime() {
+                const now = new Date();
+                return now.getHours().toString().padStart(2, '0') + ':' + 
+                       now.getMinutes().toString().padStart(2, '0');
+            }
+            
+            // Event listeners
+            sendButton.addEventListener('click', sendMessage);
+            
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            backButton.addEventListener('click', function() {
+                sidebar.classList.toggle('open');
+            });
+            
+            // Travel knowledge base and response generation
+            function generateResponse(userMessage) {
+                const lowerMessage = userMessage.toLowerCase();
+                
+                // Greetings
+                if (matchesPattern(lowerMessage, ['hi', 'hello', 'hey'])) {
+                    return "Hello there! Ready to plan your next adventure in India?"+
+                           "I am here to help you with Trip Planing.";
+                }
+                
+                // Goodbye
+                if (matchesPattern(lowerMessage, ['bye', 'goodbye', 'see you'])) {
+                    return "Happy travels! Don't hesitate to come back if you need more travel advice.";
+                }
+                
+                // Thank you
+                if (matchesPattern(lowerMessage, ['thank', 'thanks','thank you'])) {
+                    return "You're welcome! I'm happy to help with your travel plans.";
+                }
+                
+                // Budget travel questions
+                if (matchesPattern(lowerMessage, ['budget', 'cheap', 'affordable', 'low cost','cost'])) {
+                    if (matchesPattern(lowerMessage, ['trip', 'travel', 'vacation'])) {
+                        return "India offers many budget travel options! Here are some tips:\n" +
+                               "1. Consider backpacking routes like Goa-Hampi-Gokarna\n" +
+                               "2. Use overnight trains to save on accommodation\n" +
+                               "3. Stay in hostels or homestays (average ₹500-1000/night)\n" +
+                               "4. Eat at local dhabas for authentic and cheap meals\n" +
+                               "5. Visit during off-season for better deals";
+                    }
+                    
+                    if (matchesPattern(lowerMessage, ['hotel', 'stay', 'accommodation'])) {
+                        return "For budget stays in India, I recommend:\n" +
+                               "- OYO Rooms (starting ₹800/night)\n" +
+                               "- Zostel hostels (great for solo travelers)\n" +
+                               "- Homestays (check Airbnb or local websites)\n" +
+                               "- Government-run tourist bungalows\n" +
+                               "Would you like recommendations for a specific city?";
+                    }
+                }
+                
+                // Destination specific questions
+                if (matchesPattern(lowerMessage, ['goa','beaches','west'])) {
+                    return "Goa is famous for its beaches, nightlife, and Portuguese heritage!\n" +
+                           "Best beaches: Palolem (south), Anjuna (north)\n" +
+                           "Must-try: Fish curry rice, Bebinca dessert\n" +
+                           "Budget: ₹2000-3000/day (budget), ₹5000+/day (luxury)\n" +
+                           "Best time: November to February";
+                }
+                
+                if (matchesPattern(lowerMessage, ['rajasthan', 'jaipur', 'udaipur', 'jodhpur', 'North','traditional'])) {
+                    return "Rajasthan is the land of kings with majestic forts and deserts!\n" +
+                           "Top places: Jaipur (Amer Fort), Udaipur (Lake Pichola), Jaisalmer (desert)\n" +
+                           "Must-try: Dal baati churma, Laal maas\n" +
+                           "Specialty: Camel safari in Thar desert\n" +
+                           "Budget: ₹1500-2500/day (budget)";
+                }
+                
+                if (matchesPattern(lowerMessage, ['kerala', 'munnar', 'alleppey', 'kochi','South','famous','nature'])) {
+                    return "Kerala - God's Own Country with backwaters and tea gardens!\n" +
+                           "Must-do: Houseboat in Alleppey, Tea plantation tour in Munnar\n" +
+                           "Must-try: Sadhya (banana leaf meal), Appam with stew\n" +
+                           "Specialty: Ayurvedic treatments\n" +
+                           "Best time: September to March";
+                }
+                
+                if (matchesPattern(lowerMessage, ['himalayas', 'low', 'ladakh', 'manali', 'dharamshala','north'])) {
+                    return "The Indian Himalayas offer breathtaking landscapes:\n" +
+                           "Leh-Ladakh: Best for adventurous road trips (June-Sept)\n" +
+                           "Manali: Hill station with adventure sports\n" +
+                           "Dharamshala: Tibetan culture and Dalai Lama's residence\n" +
+                           "Specialty: Trekking routes like Hampta Pass, Chadar Trek\n" +
+                           "Budget: ₹1500-3000/day depending on activities";
+                }
+                
+                // Transportation questions
+                if (matchesPattern(lowerMessage, ['how to reach', 'get to', 'travel to'])) {
+                    if (matchesPattern(lowerMessage, ['flight', 'airport'])) {
+                        return "India has good air connectivity with major international airports in Delhi, Mumbai, Bangalore, and Hyderabad. Domestic flights connect most cities. Budget airlines like IndiGo, SpiceJet offer affordable fares if booked in advance.";
+                    }
+                    
+                    if (matchesPattern(lowerMessage, ['train', 'railway'])) {
+                        return "Indian Railways is extensive and affordable. For long distances, book AC classes (2AC or 3AC) for comfort. Use IRCTC website or app for bookings. Popular tourist trains include Palace on Wheels (luxury) and Himalayan Queen (scenic).";
+                    }
+                    
+                    if (matchesPattern(lowerMessage, ['bus', 'road'])) {
+                        return "State-run and private buses connect most destinations. For comfort, choose Volvo or sleeper buses for overnight journeys. RedBus is a good platform to book tickets. Self-drive car rentals are also available in major cities.";
+                    }
+                }
+                
+                // Food related
+                if (matchesPattern(lowerMessage, ['food', 'cuisine', 'eat', 'dish'])) {
+                    return "Indian cuisine varies by region:\n" +
+                           "North: Butter chicken, Rogan josh, Parathas, Chole Bhature, Curry Paneer\n" +
+                           "South: Dosa, Idli, Hyderabadi biryani, Pongal\n" +
+                           "East: Momos, Thukpa, Rasgulla\n" +
+                           "West: Vada pav, Misal Pav, Pav Bhaji, Dhokla, Bhelpuri, Basundi\n" +
+                           "Street food must-tries: Pani puri, Chaat, Kathi rolls, Jalebi, Kulhad Chai\n" +
+                           "Tip: Look for crowded local eateries for authentic experiences!";
+                }
+                
+                // Cultural questions
+                if (matchesPattern(lowerMessage, ['culture', 'custom', 'tradition'])) {
+                    return "India is culturally diverse with many traditions, north-south, east-west each region has its own well-famed dress, foods, Dance etc:\n" +
+                           "- Remove shoes before entering homes/temples\n" +
+                           "- Dress modestly, especially at religious sites\n" +
+                           "- Use right hand for eating/giving items\n" +
+                           "- Many festivals: Diwali (lights), Holi (colors), Makarsankranti, Navratri(garba) etc.\n" +
+                           "Each region has unique customs - would you like specifics about any area?";
+                }
+                
+                // Safety questions
+                if (matchesPattern(lowerMessage, ['safe', 'safety', 'danger'])) {
+                    return "General safety tips for India travel:\n" +
+                           "1. Avoid isolated areas at night\n" +
+                           "2. Use registered taxis (Ola/Uber recommended)\n" +
+                           "3. Keep valuables secure\n" +
+                           "4. Drink bottled water\n" +
+                           "5. Dress appropriately for local norms\n" +
+                           "6. Solo female travelers should research women-only accommodations\n" +
+                           "Most places(city) are safe with normal precautions!";
+                }
+                
+                // Visa questions
+                if (matchesPattern(lowerMessage, ['visa', 'document'])) {
+                    return "For visiting India:\n" +
+                           "- Most foreigners need e-Visa (apply online)\n" +
+                           "- Valid for 30/60 days, single entry\n" +
+                           "- Apply at least 4 days before travel\n" +
+                           "- Need passport valid for 6 months\n" +
+                           "- Check official website for your country's requirements\n" +
+                           "Processing usually takes 72 hours.";
+                }
+                
+                // Best time to visit
+                if (matchesPattern(lowerMessage, ['best time', 'when to visit', 'season',])) {
+                    return "India has diverse climates:\n" +
+                           "North (Himalayas): May-Oct (summer), Dec-Feb (snow)\n" +
+                           "Plains: Oct-Mar (pleasant), avoid Apr-Jun (hot)\n" +
+                           "South: Nov-Feb (best), Jun-Sep (monsoon)\n" +
+                           "Deserts: Oct-Feb\n" +
+                           "Beaches: Nov-Mar\n" +
+                           "Trek : July-Oct (To experience Adventurous Monsoon)\n" +                         
+                           "Festival seasons (Diwali, Holi etc.) are also great to experience!";
+                }
+                
+                // Shopping questions
+                if (matchesPattern(lowerMessage, ['shop', 'buy', 'souvenir'])) {
+                    return "Popular Indian shopping items:\n" +
+                           "- Textiles: Banarasi silk, Pashmina shawls - North India\n" +
+                           "- Handicrafts: Rajasthan puppets, Kerala coir \n" +
+                           "- Spices: From Kerala or Delhi's Khari Baoli\n" +
+                           "- Jewelry: Jaipur's gemstones, South Indian gold\n" +
+                           "Tip: Bargain at local markets, fixed prices in government emporiums.";
+                }
+                
+                // Adventure tourism
+                if (matchesPattern(lowerMessage, ['adventure', 'trek', 'sport'])) {
+                    return "India offers great adventure options:\n" +
+                           "Trekking: Himalayas (Himachal, Uttarakhand, Sikkim)\n" +
+                           "Water sports: Goa, Andamans (scuba, snorkeling)\n" +
+                           "Desert safari: Jaisalmer\n" +
+                           "Wildlife safaris: Ranthambore, Bandhavgarh\n" +
+                           "Paragliding: Bir-Billing (Himachal)\n" +
+                           "White water rafting: Rishikesh";
+                }
+                // North India Specific Questions
+                if (matchesPattern(lowerMessage, ['best places to visit in north india', 'north india tourist spots', 'north Indian top destination'])) {
+                return "North India is vast and diverse! Some top destinations include Delhi (historical sites), Agra (Taj Mahal), Jaipur (Pink City), Varanasi (spiritual hub), Shimla & Manali (hill stations), and Ladakh (high-altitude desert).\n\n" +
+                       "For North India, consider the Golden Triangle (Delhi, Agra, Jaipur) for history and culture, Himachal Pradesh and Uttarakhand for mountains, and Ladakh for unique landscapes and monasteries.";
+                }
+
+                if (matchesPattern(lowerMessage, ['best time to visit north india', 'North India weather', 'when to go north india'])) {
+                return "The best time to visit most of North India (plains and Rajasthan) is during winter, from October to March, when the weather is pleasant. For hill stations and Ladakh, summer (April to June) is ideal.\n\n" +
+                       "North India experiences diverse climates. Winter (Oct-Mar) is great for cities and deserts. Summer (Apr-Jun) is best for the Himalayas. Monsoon (Jul-Sep) makes some areas lush but can cause travel disruptions.";
+                }
+
+                if (matchesPattern(lowerMessage, ['things to do in delhi', 'delhi attractions', 'delhi sightseeing'])) {
+                return "In Delhi, you can explore historical sites like India Gate, Qutub Minar, Humayun's Tomb, Red Fort, and Jama Masjid. Don't miss the street food in Old Delhi and shopping in Connaught Place.\n\n" +
+                       "Delhi offers a blend of old and new. Visit the serene Lotus Temple, explore the bustling markets of Chandni Chowk, or delve into history at the National Museum.";
+                }
+
+                  if (matchesPattern(lowerMessage, ['taj mahal information', 'about taj mahal', 'visiting taj mahal'])) {
+                return "The Taj Mahal in Agra is a UNESCO World Heritage site and an ivory-white marble mausoleum. It's best visited at sunrise or sunset for stunning views and fewer crowds. It's closed on Fridays.\n\n" +
+                       "The Taj Mahal was built by Emperor Shah Jahan for his wife Mumtaz Mahal. It's a masterpiece of Mughal architecture. Remember to check official timings and entry fees before your visit.";
+                }
+
+                  if (matchesPattern(lowerMessage, ['jaipur pink city', 'things to do in jaipur', 'jaipur attractions'])) {
+                return "Jaipur, the 'Pink City' of Rajasthan, is famous for its majestic forts and palaces. Explore Amber Fort, Hawa Mahal (Palace of Winds), City Palace, and Jantar Mantar observatory.\n\n" +
+                       "In Jaipur, you can also enjoy elephant rides at Amber Fort, shop for traditional handicrafts in local bazaars, and experience Rajasthani culture through folk performances.";
+                }
+
+                    if (matchesPattern(lowerMessage, ['varanasi', 'spiritual place in North India', 'ganga aarti varanasi' ,'holy city varanasi'])) {
+                return "Varanasi, one of the world's oldest living cities, is a major spiritual hub on the banks of the River Ganges. Witnessing the Ganga Aarti ceremony at Dashashwamedh Ghat is a profound experience.\n\n" +
+                       "In Varanasi, you can take a boat ride on the Ganges at dawn, explore ancient temples like Kashi Vishwanath, and observe the spiritual rituals along the ghats.";
+                }
+
+                    if (matchesPattern(lowerMessage, ['ladakh travel', 'ladakh trip', 'high altitude ladakh', 'North India Famous Place'])) {
+                return "Ladakh, known as 'Little Tibet', offers breathtaking high-altitude landscapes, Buddhist monasteries, and adventure activities. Leh is the main town. Acclimatization to altitude is crucial.\n\n" +
+                       "A trip to Ladakh typically involves visiting Pangong Tso lake, Nubra Valley, and various monasteries like Thiksey and Hemis. The best time to visit is generally from May to October.";
+                }
+
+                    if (matchesPattern(lowerMessage, ['himachal pradesh travel', 'shimla manali trip', 'hill stations himachal'])) {
+                return "Himachal Pradesh is a popular state for hill stations like Shimla, Manali, Dharamshala, and Dalhousie. It's known for its scenic beauty, trekking, and adventure sports.\n\n" +
+                       "For a trip to Himachal, you can enjoy activities like paragliding in Bir Billing, rafting in Kullu, or simply relaxing amidst the serene mountain views.";
+                }
+
+                    if (matchesPattern(lowerMessage, ['uttarakhand travel', 'Rishikesh haridwar', 'devbhoomi uttarakhand', 'Dehradun'])) {
+                return "Uttarakhand, often called 'Devbhoomi' (Land of Gods), is home to spiritual centers like Rishikesh (Yoga Capital) and Haridwar (Ganga Aarti), and scenic hill stations like Nainital and Mussoorie.\n\n" +
+                       "Adventure enthusiasts can enjoy white-water rafting in Rishikesh, trekking to places like Valley of Flowers, and exploring wildlife in Jim Corbett National Park in Uttarakhand.";
+                }
+
+                    if (matchesPattern(lowerMessage, ['north indian food', 'famous dishes north india', 'what to eat north india'])) {
+                return "North Indian cuisine is rich and flavorful! Must-try dishes include Butter Chicken, Dal Makhani, Chole Bhature, Aloo Paratha, and various Tandoori breads like Naan and Roti.\n\n" +
+                       "Don't miss the street food in North India, especially in Delhi. Also, try regional specialties like Rogan Josh from Kashmir, and the sweets like Gulab Jamun and Jalebi.";
+                }
+
+                    if (matchesPattern(lowerMessage, ['ranthambore national park', 'tiger safari rajasthan'])) {
+                return "Ranthambore National Park in Rajasthan is one of the best places in India to spot tigers in their natural habitat. It's also home to other wildlife like leopards, deer, and various bird species.\n\n" +
+                       "For a wildlife safari in North India, Ranthambore offers thrilling jeep and canter safaris. It's advisable to book your safaris well in advance, especially during peak season.";
+                }
+
+                    if (matchesPattern(lowerMessage, ['golden temple amritsar', 'harmandir sahib','Punjab'])) {
+                return "The Golden Temple (Harmandir Sahib) in Amritsar is the holiest shrine of Sikhism and a stunning architectural marvel. It's known for its serene atmosphere and the langar (community kitchen) that serves free meals to thousands daily.\n\n" +
+                       "Visiting the Golden Temple offers a profound spiritual and cultural experience. The complex is open to all, regardless of faith, and is particularly beautiful at night when illuminated.";
+                }
+
+
+                // South India Questions
+
+               // 1. About famous temples
+                  if (matchesPattern(lowerMessage, ['famous temples south india', 'holy places south india', 'pilgrimage sites south'])) {
+                return "South India is renowned for its magnificent temples. Some of the most sacred include:\n" +
+                       "- Meenakshi Temple, Madurai (Tamil Nadu)\n" +
+                       "- Tirupati Balaji (Andhra Pradesh)\n" +
+                       "- Sabarimala Temple (Kerala)\n" +
+                       "- Brihadeeswara Temple, Thanjavur (Tamil Nadu)\n" +
+                       "- Guruvayur Temple (Kerala)\n" +
+                       "These temples showcase stunning Dravidian architecture and vibrant religious traditions.";
+                  }
+
+               // 2. Best vacation spots
+                  if (matchesPattern(lowerMessage, ['best places south india', 'vacation spots south', 'tourist places south india'])) {
+                return "Top vacation destinations in South India:\n" +
+                       "- Kerala Backwaters (houseboat stays)\n" +
+                       "- Goa Beaches (Portuguese influence)\n" +
+                       "- Ooty & Coorg (hill stations)\n" +
+                       "- Hampi (ancient ruins)\n" +
+                       "- Pondicherry (French colony)\n" +
+                       "- Andaman Islands (pristine beaches)\n" +
+                       "- Mysore Palace (royal heritage)";
+                    }
+
+              // 3. About South Indian culture
+                  if (matchesPattern(lowerMessage, ['south indian culture', 'traditions south india', 'dance forms south'])) {
+                return "South Indian culture is rich and diverse:\n" +
+                       "- Classical dances: Bharatanatyam (TN), Kathakali (Kerala), Kuchipudi (AP)\n" +
+                       "- Festivals: Pongal, Onam, Ugadi, Vishu\n" +
+                       "- Art forms: Tanjore paintings, Theyyam rituals\n" +
+                       "- Traditional clothing: Sarees with gold borders, Veshti (dhoti)\n" +
+                       "- Temple architecture: Gopurams, stone carvings";
+                    }
+
+              // 4. About South Indian food
+                  if (matchesPattern(lowerMessage, ['south indian food', 'famous dishes south', 'what to eat south india'])) {
+                return "Must-try South Indian foods:\n" +
+                       "- Breakfast: Dosa, Idli, Vada with sambar & chutney\n" +
+                       "- Meals: Banana leaf meals with rice, rasam, curries\n" +
+                       "- Specialties: Hyderabadi Biryani, Kerala Sadya, Chettinad cuisine\n" +
+                       "- Snacks: Bonda, Bajji, Pongal\n" +
+                       "- Drinks: Filter coffee, tender coconut water\n" +
+                       "- Desserts: Payasam, Mysore Pak";
+                    }
+
+              // 5. About Kerala tourism
+                  if (matchesPattern(lowerMessage, ['kerala tourism', 'places to visit kerala', 'god\'s own country'])) {
+                return "Kerala highlights:\n" +
+                       "- Backwaters of Alleppey & Kumarakom\n" +
+                       "- Hill stations: Munnar, Wayanad\n" +
+                       "- Beaches: Kovalam, Varkala\n" +
+                       "- Wildlife: Periyar Tiger Reserve\n" +
+                       "- Culture: Kathakali shows, Ayurvedic treatments\n" +
+                       "- Unique experiences: Houseboat stays, snake boat races";
+                    }
+
+              // 6. About Tamil Nadu heritage
+                  if (matchesPattern(lowerMessage, ['tamil nadu tourism', 'heritage tamil nadu', 'temples tamil nadu'])) {
+                return "Tamil Nadu's rich heritage includes:\n" +
+                       "- Temple cities: Madurai, Rameswaram, Kanchipuram\n" +
+                       "- UNESCO sites: Great Living Chola Temples\n" +
+                       "- Hill stations: Ooty, Kodaikanal\n" +
+                       "- French influence: Pondicherry\n" +
+                       "- Cultural hub: Chennai's museums & music scene\n" +
+                       "- Pilgrimage: Velankanni Church";
+                    }
+
+              // 7. About Karnataka attractions
+                  if (matchesPattern(lowerMessage, ['karnataka tourism', 'places to visit karnataka', 'bangalore attractions'])) {
+                return "Karnataka offers diverse experiences:\n" +
+                       "- Historical: Hampi ruins, Mysore Palace\n" +
+                       "- Nature: Coorg coffee estates, Jog Falls\n" +
+                       "- Wildlife: Bandipur, Nagarhole parks\n" +
+                       "- Modern: Bangalore's tech parks & nightlife\n" +
+                       "- Spiritual: Shravanabelagola, Dharmasthala\n" +
+                       "- Beaches: Gokarna, Karwar";
+                    }
+
+                  // 8. About Andhra/Telangana
+                  if (matchesPattern(lowerMessage, ['andhra pradesh tourism', 'telangana attractions', 'hyderabad places'])) {
+                  return "Andhra Pradesh & Telangana highlights:\n" +
+                         "- Hyderabad: Charminar, Golconda Fort, Ramoji Film City\n" +
+                         "- Tirupati: Venkateswara Temple\n" +
+                         "- Beaches: Visakhapatnam\n" +
+                         "- Caves: Borra Caves\n" +
+                         "- Cuisine: Hyderabadi Biryani, Mirchi ka Salan\n" +
+                         "- Handicrafts: Bidriware, Pochampally sarees";
+                      }
+
+                  // 9. About monsoon tourism
+                  if (matchesPattern(lowerMessage, ['south india monsoon', 'best time visit south', 'weather south india'])) {
+                    return "South India weather guide:\n" +
+                           "- Best time: Oct-Mar (pleasant weather)\n" +
+                           "- Monsoon: Jun-Sep (lush greenery, some disruptions)\n" +
+                           "- Summer: Apr-Jun (hot, hill stations recommended)\n" +
+                           "- Kerala monsoon is beautiful but some activities limited\n" +
+                           "- Winter is perfect for temple tours and beach visits";
+                      }
+
+                  // 10. About South Indian languages
+                  if (matchesPattern(lowerMessage, ['south india languages', 'how many languages south', 'tamil telugu kannada malayalam'])) {
+                      return "South India has 4 major Dravidian languages:\n" +
+                             "- Tamil (Tamil Nadu)\n" +
+                             "- Telugu (Andhra & Telangana)\n" +
+                             "- Kannada (Karnataka)\n" +
+                             "- Malayalam (Kerala)\n" +
+                             "- English widely understood in tourist areas\n" +
+                             "- Basic phrases help in rural regions";
+                        }
+                
+
+                
+                // If no specific pattern matches
+                return "I'm sorry, I don't have specific information about that. As a travel assistant, I can help with:\n" +
+                       "- Destination recommendations\n" +
+                       "- Budget travel tips\n" +
+                       "- Hotel and transportation advice\n" +
+                       "- Cultural information about India\n" +
+                       "Could you please rephrase your question or ask about something else related to travel in India?";
+            }
+            
+            // Helper function to check if message matches any pattern
+            function matchesPattern(message, patterns) {
+                return patterns.some(pattern => message.includes(pattern));
+            }
+        });
+    </script>
+</body>
+</html>

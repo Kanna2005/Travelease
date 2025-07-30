@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travelease - Weather Forecast</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 250px;
+      background-color: #1e3a8a;
+      color: white;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar h2 {
+      margin-bottom: 30px;
+      font-size: 1.5rem;
+      text-align: center;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .sidebar a {
+      color: white;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 15px;
+      margin: 8px 0;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+
+    .sidebar a:hover, .sidebar a.active {
+      background-color: #3b82f6;
+      transform: translateX(5px);
+    }
+
+    .sidebar a i {
+      width: 20px;
+      text-align: center;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      color: #1e3a8a;
+      font-size: 2rem;
+    }
+
+    .search-container {
+      position: relative;
+      width: 300px;
+    }
+
+    #location-search {
+      width: 100%;
+      padding: 12px 15px;
+      padding-left: 40px;
+      border-radius: 30px;
+      border: 1px solid #cbd5e1;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    #location-search:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .search-container i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+    }
+
+    .weather-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+
+    .current-weather {
+      background: linear-gradient(135deg, #3b82f6, #1e40af);
+      color: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .location-info h2 {
+      font-size: 1.8rem;
+      margin-bottom: 5px;
+    }
+
+    .location-info p {
+      opacity: 0.9;
+      margin-bottom: 20px;
+    }
+
+    .weather-main {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .temperature {
+      font-size: 4rem;
+      font-weight: 300;
+      margin-right: 20px;
+    }
+
+    .weather-icon {
+      width: 80px;
+      height: 80px;
+      margin-right: 20px;
+    }
+
+    .weather-desc {
+      font-size: 1.2rem;
+      text-transform: capitalize;
+    }
+
+    .weather-details {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+
+    .detail-item {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding: 12px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .detail-item i {
+      font-size: 1.2rem;
+    }
+
+    .detail-text span:first-child {
+      display: block;
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+
+    .detail-text span:last-child {
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .forecast-card {
+      background-color: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .forecast-card h3 {
+      margin-bottom: 20px;
+      color: #1e293b;
+      font-size: 1.3rem;
+    }
+
+    .hourly-forecast {
+      display: flex;
+      gap: 15px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+
+    .hourly-item {
+      min-width: 80px;
+      text-align: center;
+      padding: 10px;
+      border-radius: 10px;
+      background-color: #f1f5f9;
+    }
+
+    .hourly-item.active {
+      background-color: #dbeafe;
+      border: 1px solid #3b82f6;
+    }
+
+    .hourly-item p:first-child {
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+
+    .hourly-item img {
+      width: 40px;
+      height: 40px;
+      margin: 5px 0;
+    }
+
+    .hourly-item p:last-child {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .daily-forecast {
+      margin-top: 20px;
+    }
+
+    .daily-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .daily-item:last-child {
+      border-bottom: none;
+    }
+
+    .day-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      width: 150px;
+    }
+
+    .day-info img {
+      width: 30px;
+      height: 30px;
+    }
+
+    .temp-range {
+      display: flex;
+      gap: 20px;
+    }
+
+    .temp-range span {
+      width: 40px;
+      text-align: right;
+      font-weight: 500;
+    }
+
+    .temp-range span:first-child {
+      color: #3b82f6;
+    }
+
+    .temp-range span:last-child {
+      color: #ef4444;
+    }
+
+    .travel-tips {
+      background-color: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+    }
+
+    .travel-tips h3 {
+      margin-bottom: 15px;
+      color: #1e293b;
+      font-size: 1.3rem;
+    }
+
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+    }
+
+    .tip-card {
+      background-color: #f8fafc;
+      border-radius: 10px;
+      padding: 15px;
+      border-left: 4px solid #3b82f6;
+    }
+
+    .tip-card h4 {
+      margin-bottom: 8px;
+      color: #1e40af;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .popular-destinations {
+      background-color: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .popular-destinations h3 {
+      margin-bottom: 20px;
+      color: #1e293b;
+      font-size: 1.3rem;
+    }
+
+    .destinations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .destination-card {
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s;
+      cursor: pointer;
+    }
+
+    .destination-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .destination-img {
+      height: 120px;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .destination-info {
+      padding: 15px;
+      background-color: white;
+    }
+
+    .destination-info h4 {
+      margin-bottom: 5px;
+      color: #1e293b;
+    }
+
+    .destination-info p {
+      color: #64748b;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .chart-container {
+      height: 300px;
+      margin-top: 20px;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 992px) {
+      .sidebar {
+        width: 80px;
+        padding: 20px 10px;
+      }
+      .sidebar h2, .sidebar a span {
+        display: none;
+      }
+      .sidebar a {
+        justify-content: center;
+        padding: 12px 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px;
+        padding: 10px;
+      }
+      .sidebar a {
+        padding: 10px 12px;
+      }
+      .main-content {
+        padding: 20px;
+      }
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+      .search-container {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .weather-main {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .temperature {
+        font-size: 3rem;
+      }
+      .weather-details {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <h2>Travelease</h2>
+      <a href="index.html"><i class="fas fa-home"></i> <span>Home</span></a>
+      <a href="weather.html" class="active"><i class="fas fa-cloud-sun"></i> <span>Weather</span></a>
+      <a href="festivals.html"><i class="fas fa-map"></i> <span>Festivals</span></a>
+      <a href="places.html"><i class="fas fa-map-marked-alt"></i> <span>Places</span></a>
+      <a href="budget.html"><i class="fas fa-wallet"></i> <span>Budget</span></a>
+    </div>
+
+    <div class="main-content">
+      <div class="header">
+        <h1>Weather Forecast</h1>
+        <div class="search-container">
+          <i class="fas fa-search"></i>
+          <input type="text" id="location-search" placeholder="Search for a city in India...">
+        </div>
+      </div>
+
+      <div class="weather-grid">
+        <div class="current-weather">
+          <div class="location-info">
+            <h2 id="current-city">New Delhi</h2>
+            <p id="current-date">Monday, June 12, 2023</p>
+          </div>
+          <div class="weather-main">
+            <div class="temperature" id="current-temp">32°C</div>
+            <img src="https://openweathermap.org/img/wn/01d@2x.png" alt="Weather icon" class="weather-icon" id="weather-icon">
+            <div class="weather-desc" id="weather-desc">Sunny</div>
+          </div>
+          <div class="weather-details">
+            <div class="detail-item">
+              <i class="fas fa-wind"></i>
+              <div class="detail-text">
+                <span>Wind Speed</span>
+                <span id="wind-speed">12 km/h</span>
+              </div>
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-tint"></i>
+              <div class="detail-text">
+                <span>Humidity</span>
+                <span id="humidity">45%</span>
+              </div>
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-compress-arrows-alt"></i>
+              <div class="detail-text">
+                <span>Pressure</span>
+                <span id="pressure">1012 hPa</span>
+              </div>
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-sun"></i>
+              <div class="detail-text">
+                <span>UV Index</span>
+                <span id="uv-index">6 (High)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="forecast-card">
+          <h3>Hourly Forecast</h3>
+          <div class="hourly-forecast" id="hourly-forecast">
+            <!-- Hourly items will be added here by JavaScript -->
+          </div>
+          <div class="chart-container">
+            <canvas id="temperature-chart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="forecast-card">
+        <h3>7-Day Forecast</h3>
+        <div class="daily-forecast" id="daily-forecast">
+          <!-- Daily items will be added here by JavaScript -->
+        </div>
+      </div>
+
+      <div class="travel-tips">
+        <h3>Travel Tips for Current Weather</h3>
+        <div class="tips-grid">
+          <div class="tip-card">
+            <h4><i class="fas fa-tshirt"></i> Clothing</h4>
+            <p>Wear light, breathable cotton clothes. Use sunscreen and carry sunglasses.</p>
+          </div>
+          <div class="tip-card">
+            <h4><i class="fas fa-utensils"></i> Food</h4>
+            <p>Stay hydrated with coconut water and lassi. Try seasonal fruits like mangoes.</p>
+          </div>
+          <div class="tip-card">
+            <h4><i class="fas fa-running"></i> Activities</h4>
+            <p>Best time for outdoor activities is early morning or late evening.</p>
+          </div>
+          <div class="tip-card">
+            <h4><i class="fas fa-briefcase-medical"></i> Health</h4>
+            <p>Carry oral rehydration salts. Watch for heat exhaustion symptoms.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="popular-destinations">
+        <h3>Popular Indian Destinations</h3>
+        <div class="destinations-grid" id="destinations-grid">
+          <!-- Destination cards will be added here by JavaScript -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Sample data for Indian locations
+    const indianCities = [
+      "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Ahmedabad", 
+      "Chennai", "Kolkata", "Surat", "Pune", "Jaipur",
+      "Lucknow", "Kanpur", "Nagpur", "Visakhapatnam", "Indore",
+      "Thane", "Bhopal", "Patna", "Vadodara", "Ghaziabad"
+    ];
+
+    // Current weather data for Indian cities
+    const weatherData = {
+      "New Delhi": {
+        temp: 32,
+        condition: "Sunny",
+        icon: "01d",
+        wind: 12,
+        humidity: 45,
+        pressure: 1012,
+        uv: 6,
+        hourly: [
+          { time: "Now", temp: 32, icon: "01d" },
+          { time: "1 PM", temp: 34, icon: "01d" },
+          { time: "2 PM", temp: 35, icon: "01d" },
+          { time: "3 PM", temp: 36, icon: "01d" },
+          { time: "4 PM", temp: 35, icon: "01d" },
+          { time: "5 PM", temp: 33, icon: "01d" },
+          { time: "6 PM", temp: 31, icon: "01d" },
+          { time: "7 PM", temp: 29, icon: "01n" }
+        ],
+        daily: [
+          { day: "Tue", icon: "01d", max: 36, min: 28 },
+          { day: "Wed", icon: "02d", max: 35, min: 27 },
+          { day: "Thu", icon: "03d", max: 34, min: 26 },
+          { day: "Fri", icon: "09d", max: 32, min: 25 },
+          { day: "Sat", icon: "10d", max: 30, min: 24 },
+          { day: "Sun", icon: "11d", max: 29, min: 23 },
+          { day: "Mon", icon: "50d", max: 31, min: 25 }
+        ]
+      },
+      "Mumbai": {
+        temp: 29,
+        condition: "Partly Cloudy",
+        icon: "02d",
+        wind: 18,
+        humidity: 78,
+        pressure: 1010,
+        uv: 7,
+        hourly: [
+          { time: "Now", temp: 29, icon: "02d" },
+          { time: "1 PM", temp: 30, icon: "02d" },
+          { time: "2 PM", temp: 31, icon: "03d" },
+          { time: "3 PM", temp: 31, icon: "03d" },
+          { time: "4 PM", temp: 30, icon: "03d" },
+          { time: "5 PM", temp: 29, icon: "03d" },
+          { time: "6 PM", temp: 28, icon: "02n" },
+          { time: "7 PM", temp: 27, icon: "02n" }
+        ],
+        daily: [
+          { day: "Tue", icon: "02d", max: 32, min: 26 },
+          { day: "Wed", icon: "03d", max: 31, min: 26 },
+          { day: "Thu", icon: "09d", max: 30, min: 25 },
+          { day: "Fri", icon: "10d", max: 29, min: 25 },
+          { day: "Sat", icon: "11d", max: 28, min: 24 },
+          { day: "Sun", icon: "50d", max: 29, min: 25 },
+          { day: "Mon", icon: "01d", max: 31, min: 26 }
+        ]
+      },
+      // Add more cities as needed
+    };
+
+    // Popular Indian destinations data
+    const popularDestinations = [
+      {
+        name: "Goa",
+        description: "Beaches & Nightlife",
+        image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        bestTime: "Nov-Feb",
+        weather: "Tropical"
+      },
+      {
+        name: "Jaipur",
+        description: "Heritage & Culture",
+        image: "https://images.unsplash.com/photo-1534751516642-a1af1ef26a56?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        bestTime: "Oct-Mar",
+        weather: "Desert"
+      },
+      {
+        name: "Kerala",
+        description: "Backwaters & Nature",
+        image: "https://images.unsplash.com/photo-1583417319070-4a69db38a482?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        bestTime: "Sep-Mar",
+        weather: "Tropical"
+      },
+      {
+        name: "Shimla",
+        description: "Hills & Snow",
+        image: "https://images.unsplash.com/photo-1582972236019-ea9e293f5a78?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        bestTime: "Apr-Jun, Dec-Jan",
+        weather: "Mountain"
+      },
+      {
+        name: "Varanasi",
+        description: "Spiritual & Ghats",
+        image: "https://images.unsplash.com/photo-1566438480900-0609be27a4be?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        bestTime: "Oct-Mar",
+        weather: "Subtropical"
+      },
+      {
+        name: "Rajasthan",
+        description: "Desert & Forts",
+        image: "https://images.unsplash.com/photo-1452800185063-6db5e12b8e2e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        bestTime: "Nov-Feb",
+        weather: "Desert"
+      }
+    ];
+
+    // Initialize the page with default city (Delhi)
+    document.addEventListener('DOMContentLoaded', function() {
+      updateWeather("New Delhi");
+      renderPopularDestinations();
+      setupSearch();
+      updateCurrentDate();
+    });
+
+    // Update weather information for selected city
+    function updateWeather(city) {
+      const data = weatherData[city] || weatherData["New Delhi"];
+      
+      // Update current weather
+      document.getElementById("current-city").textContent = city;
+      document.getElementById("current-temp").textContent = `${data.temp}°C`;
+      document.getElementById("weather-icon").src = `https://openweathermap.org/img/wn/${data.icon}@2x.png`;
+      document.getElementById("weather-desc").textContent = data.condition;
+      document.getElementById("wind-speed").textContent = `${data.wind} km/h`;
+      document.getElementById("humidity").textContent = `${data.humidity}%`;
+      document.getElementById("pressure").textContent = `${data.pressure} hPa`;
+      document.getElementById("uv-index").textContent = `${data.uv} (${getUvLevel(data.uv)})`;
+      
+      // Update hourly forecast
+      const hourlyContainer = document.getElementById("hourly-forecast");
+      hourlyContainer.innerHTML = "";
+      data.hourly.forEach(hour => {
+        hourlyContainer.innerHTML += `
+          <div class="hourly-item ${hour.time === "Now" ? "active" : ""}">
+            <p>${hour.time}</p>
+            <img src="https://openweathermap.org/img/wn/${hour.icon}.png" alt="Weather">
+            <p>${hour.temp}°</p>
+          </div>
+        `;
+      });
+      
+      // Update daily forecast
+      const dailyContainer = document.getElementById("daily-forecast");
+      dailyContainer.innerHTML = "";
+      data.daily.forEach(day => {
+        dailyContainer.innerHTML += `
+          <div class="daily-item">
+            <div class="day-info">
+              <span>${day.day}</span>
+              <img src="https://openweathermap.org/img/wn/${day.icon}.png" alt="Weather">
+            </div>
+            <div class="temp-range">
+              <span>${day.max}°</span>
+              <span>${day.min}°</span>
+            </div>
+          </div>
+        `;
+      });
+      
+      // Update temperature chart
+      updateTemperatureChart(data.hourly);
+      
+      // Update travel tips based on weather
+      updateTravelTips(data.condition, data.temp);
+    }
+
+    // Render popular destinations
+    function renderPopularDestinations() {
+      const container = document.getElementById("destinations-grid");
+      container.innerHTML = "";
+      
+      popularDestinations.forEach(dest => {
+        container.innerHTML += `
+          <div class="destination-card" onclick="showDestinationWeather('${dest.name}')">
+            <div class="destination-img" style="background-image: url('${dest.image}')"></div>
+            <div class="destination-info">
+              <h4>${dest.name}</h4>
+              <p><i class="fas fa-info-circle"></i> ${dest.description}</p>
+              <p><i class="fas fa-calendar-alt"></i> Best time: ${dest.bestTime}</p>
+              <p><i class="fas fa-cloud"></i> Climate: ${dest.weather}</p>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // Show weather for selected destination
+    function showDestinationWeather(destination) {
+      // In a real app, this would fetch actual weather data for the destination
+      // For demo, we'll use Delhi data for all destinations
+      updateWeather(destination);
+      document.getElementById("location-search").value = destination;
+      
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Update temperature chart
+    function updateTemperatureChart(hourlyData) {
+      const ctx = document.getElementById('temperature-chart').getContext('2d');
+      
+      // Destroy previous chart if it exists
+      if (window.tempChart) {
+        window.tempChart.destroy();
+      }
+      
+      const labels = hourlyData.map(hour => hour.time);
+      const data = hourlyData.map(hour => hour.temp);
+      
+      window.tempChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Temperature (°C)',
+            data: data,
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            borderColor: 'rgba(59, 130, 246, 1)',
+            borderWidth: 2,
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: false,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Update travel tips based on weather condition
+    function updateTravelTips(condition, temp) {
+      const tipsContainer = document.querySelector(".tips-grid");
+      let tips = [];
+      
+      if (temp > 30) {
+        tips = [
+          {
+            icon: "fa-tshirt",
+            title: "Clothing",
+            text: "Wear light, breathable cotton clothes. Use sunscreen with SPF 30+ and carry sunglasses."
+          },
+          {
+            icon: "fa-utensils",
+            title: "Food",
+            text: "Stay hydrated with coconut water and lassi. Try seasonal fruits like mangoes and watermelon."
+          },
+          {
+            icon: "fa-running",
+            title: "Activities",
+            text: "Best time for outdoor activities is early morning or late evening. Avoid midday sun."
+          },
+          {
+            icon: "fa-briefcase-medical",
+            title: "Health",
+            text: "Carry oral rehydration salts. Watch for heat exhaustion symptoms like dizziness."
+          }
+        ];
+      } else if (temp < 15) {
+        tips = [
+          {
+            icon: "fa-tshirt",
+            title: "Clothing",
+            text: "Wear layered woolen clothing. Don't forget gloves, muffler and warm socks."
+          },
+          {
+            icon: "fa-utensils",
+            title: "Food",
+            text: "Hot soups, herbal teas and dry fruits help maintain body temperature."
+          },
+          {
+            icon: "fa-running",
+            title: "Activities",
+            text: "Perfect weather for daytime sightseeing. Carry hand warmers if needed."
+          },
+          {
+            icon: "fa-briefcase-medical",
+            title: "Health",
+            text: "Moisturize skin regularly. Beware of frostbite in extreme cold."
+          }
+        ];
+      } else {
+        tips = [
+          {
+            icon: "fa-tshirt",
+            title: "Clothing",
+            text: "Light layers work best. Carry a light jacket for cooler evenings."
+          },
+          {
+            icon: "fa-utensils",
+            title: "Food",
+            text: "Enjoy local seasonal produce. Stay hydrated throughout the day."
+          },
+          {
+            icon: "fa-running",
+            title: "Activities",
+            text: "Great weather for all outdoor activities. Plan full day excursions."
+          },
+          {
+            icon: "fa-briefcase-medical",
+            title: "Health",
+            text: "Standard precautions apply. Carry basic medicines for headaches."
+          }
+        ];
+      }
+      
+      // Add condition-specific tips
+      if (condition.toLowerCase().includes("rain")) {
+        tips[0].text += " Carry a waterproof jacket or umbrella.";
+        tips[2].text = "Plan indoor activities or carry rain gear if going out.";
+      } else if (condition.toLowerCase().includes("cloud")) {
+        tips[0].text += " The UV index may still be high despite clouds.";
+      }
+      
+      // Update tips in DOM
+      tipsContainer.innerHTML = "";
+      tips.forEach(tip => {
+        tipsContainer.innerHTML += `
+          <div class="tip-card">
+            <h4><i class="fas ${tip.icon}"></i> ${tip.title}</h4>
+            <p>${tip.text}</p>
+          </div>
+        `;
+      });
+    }
+
+    // Set up search functionality
+    function setupSearch() {
+      const searchInput = document.getElementById("location-search");
+      
+      // Autocomplete for Indian cities
+      searchInput.addEventListener("input", function() {
+        // In a real app, this would filter from a larger dataset
+        // For demo, we're just showing a few Indian cities
+      });
+      
+      // Search when Enter is pressed
+      searchInput.addEventListener("keypress", function(e) {
+        if (e.key === "Enter") {
+          const city = this.value.trim();
+          if (city) {
+            updateWeather(city);
+          }
+        }
+      });
+    }
+
+    // Update current date display
+    function updateCurrentDate() {
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const today = new Date().toLocaleDateString('en-US', options);
+      document.getElementById("current-date").textContent = today;
+    }
+
+    // Helper function to get UV level description
+    function getUvLevel(uvIndex) {
+      if (uvIndex <= 2) return "Low";
+      if (uvIndex <= 5) return "Moderate";
+      if (uvIndex <= 7) return "High";
+      if (uvIndex <= 10) return "Very High";
+      return "Extreme";
+    }
+  </script>
+</body>
+</html>

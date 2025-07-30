@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Travelease - Your Smart Travel Chatbot</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+    .features a {
+      text-decoration: none;
+      color: inherit;
+    }
+    .feature-card {
+      text-align: center;
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+  </style>
+</head>
+<body class="home-page">
+
+  <!-- Top Right Header with Login -->
+  <header class="main-header">
+    <div class="logo">
+      <a href="index.html" style="text-decoration: none; color: white;">
+        Travelease
+      </a>
+    </div>
+    <nav>
+      <a href="chat.html">Explore</a>
+      <a href="login.html" class="login-btn">Login</a>
+    </nav>
+  </header>
+
+  <div class="overlay">
+    <header>
+      <h1>🌍 Travel Buddy</h1>
+      <p>Your AI-powered travel planner</p>
+    </header>
+
+    <section class="features">
+      <a href="weather.html">
+        <div class="feature-card">
+          <i class="fas fa-cloud-sun fa-2x"></i>
+          <h3>Weather-Based Plans</h3>
+          <p>Get travel advice based on real-time weather data.</p>
+        </div>
+      </a>
+
+      <a href="festivals.html">
+        <div class="feature-card">
+          <i class="fas fa-map-marked-alt fa-2x"></i>
+          <h3>Festival Finder</h3>
+          <p>Explore local festivals to enhance your trip experience.</p>
+        </div>
+      </a>
+
+      <a href="qa.html">
+        <div class="feature-card">
+          <i class="fas fa-robot fa-2x"></i>
+          <h3>Smart Q&A</h3>
+          <p>Ask anything. Let the AI guide your trip instantly.</p>
+        </div>
+      </a>
+
+      <a href="routes.html">
+        <div class="feature-card">
+          <i class="fas fa-route fa-2x"></i>
+          <h3>Route Optimizer</h3>
+          <p>Get the most efficient travel routes between attractions.</p>
+        </div>
+      </a>
+
+      <a href="food.html">
+        <div class="feature-card">
+          <i class="fas fa-utensils fa-2x"></i>
+          <h3>Local Cuisine</h3>
+          <p>Discover must-try local dishes and top-rated restaurants.</p>
+        </div>
+      </a>
+
+      <a href="budget.html">
+        <div class="feature-card">
+          <i class="fas fa-wallet fa-2x"></i>
+          <h3>Budget Planner</h3>
+          <p>Estimate costs and manage your travel expenses.</p>
+        </div>
+      </a>
+    </section>
+
+    <div class="cta">
+      <a href="chat.html" class="start-btn">Start Planning Now</a>
+    </div>
+  </div>
+</body>
+</html>
