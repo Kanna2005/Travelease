@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan Your Budget!!</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center my-4">Plan Your Budget and Expense</h1>
+        
+        <div class="row">
+            <!-- Budget Summary -->
+            <div class="col-md-4">
+                <div class="card summary-card">
+                    <div class="card-header bg-primary text-white">
+                        <h5>Budget Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="totalBudget" class="form-label">Total Budget (INR)</label>
+                            <input type="number" class="form-control" id="totalBudget" placeholder="Enter your total budget">
+                        </div>
+                        <div class="progress mb-3">
+                            <div id="budgetProgress" class="progress-bar progress-bar-striped" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Spent: <span id="totalSpent">0</span> INR</span>
+                            <span>Remaining: <span id="remainingBudget">0</span> INR</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Currency Converter -->
+                <div class="card mt-4">
+                    <div class="card-header bg-success text-white">
+                        <h5>Currency Converter</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="amount" class="form-label">Amount</label>
+                                <input type="number" class="form-control" id="amount" placeholder="100">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="fromCurrency" class="form-label">From</label>
+                                <select class="form-select" id="fromCurrency">
+                                    <option value="USD">USD</option>
+                                    <option value="EUR">EUR</option>
+                                    <option value="GBP">GBP</option>
+                                    <option value="AUD">AUD</option>
+                                    <option value="CAD">CAD</option>
+                                    <option value="SGD">SGD</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button id="convertBtn" class="btn btn-success mt-3 w-100">Convert to INR</button>
+                        <div class="mt-3 p-2 bg-light rounded">
+                            <h6>Converted Amount:</h6>
+                            <p id="convertedAmount" class="h4 text-center">0 INR</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Budget Tips -->
+                <div class="card mt-4 tips-card">
+                    <div class="card-header bg-warning">
+                        <h5>India Travel Budget Tips</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><i class="fas fa-lightbulb"></i> Use trains instead of flights for inter-city travel</li>
+                            <li class="list-group-item"><i class="fas fa-lightbulb"></i> Eat at local dhabas for authentic & cheap meals</li>
+                            <li class="list-group-item"><i class="fas fa-lightbulb"></i> Book homestays or guesthouses instead of hotels</li>
+                            <li class="list-group-item"><i class="fas fa-lightbulb"></i> Use prepaid taxis or ride-sharing apps</li>
+                            <li class="list-group-item"><i class="fas fa-lightbulb"></i> Carry a water bottle and refill at RO stations</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expense Tracker -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5>Add New Expense</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="expenseForm">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label for="expenseDate" class="form-label">Date</label>
+                                    <input type="date" class="form-control" id="expenseDate" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="expenseCategory" class="form-label">Category</label>
+                                    <select class="form-select" id="expenseCategory" required>
+                                        <option value="">Select Category</option>
+                                        <option value="Accommodation">Accommodation</option>
+                                        <option value="Food">Food</option>
+                                        <option value="Transport">Transport</option>
+                                        <option value="Shopping">Shopping</option>
+                                        <option value="Activities">Activities</option>
+                                        <option value="Others">Others</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="expenseAmount" class="form-label">Amount (INR)</label>
+                                    <input type="number" class="form-control" id="expenseAmount" placeholder="500" required>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-8">
+                                    <label for="expenseDescription" class="form-label">Description</label>
+                                    <input type="text" class="form-control" id="expenseDescription" placeholder="Dinner at local restaurant">
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary w-100">Add Expense</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Expense Table -->
+                <div class="card mt-4">
+                    <div class="card-header bg-secondary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5>Expense Records</h5>
+                            <button id="clearAllBtn" class="btn btn-sm btn-danger">Clear All</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Category</th>
+                                        <th>Description</th>
+                                        <th>Amount (INR)</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="expenseTableBody">
+                                    <!-- Expenses will be added here dynamically -->
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-primary">
+                                        <td colspan="3" class="text-end fw-bold">Total:</td>
+                                        <td id="expenseTotal" class="fw-bold">0 INR</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expense Analysis -->
+                <div class="card mt-4">
+                    <div class="card-header bg-dark text-white">
+                        <h5>Expense Analysis</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+                            <div class="col-md-6">
+                                <canvas id="dailyChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/budget.js"></script>
+</body>
+</html>

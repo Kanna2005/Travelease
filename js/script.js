@@ -1,130 +1,173 @@
-function sendMessage() {
-  const input = document.getElementById("user-input");
-  const chatBox = document.getElementById("chat-box");
-  const message = input.value.trim();
-
-  if (!message) return;
-
-  appendMessage("You", message, "user");
-
-  const response = getBotResponse(message.toLowerCase());
-  setTimeout(() => {
-    appendMessage("Bot", response, "bot");
-  }, 500);
-
-  input.value = "";
-  chatBox.scrollTop = chatBox.scrollHeight;
+// script.js - Main chatbot functionality
+class TravelBuddy {
+    constructor() {
+        this.chatContainer = document.getElementById('chatContainer');
+        this.messageInput = document.getElementById('messageInput');
+        this.sendButton = document.getElementById('sendButton');
+        this.chatHistory = document.getElementById('chatHistory');
+        this.sidebar = document.getElementById('sidebar');
+        this.backButton = document.getElementById('backButton');
+        
+        this.conversations = [];
+        this.currentConversation = [];
+        
+        this.setupEventListeners();
+        this.showWelcomeMessage();
+    }
+    
+    setupEventListeners() {
+        this.sendButton.addEventListener('click', () => this.sendMessage());
+        this.messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.sendMessage();
+        });
+        this.backButton.addEventListener('click', () => {
+            this.sidebar.classList.toggle('open');
+        });
+    }
+    
+    showWelcomeMessage() {
+        setTimeout(() => {
+            this.addBotMessage("Hello! I'm TravelBuddy, your personal travel assistant for India. I can help you with travel plans, budget trips, hotel information, and details about Indian destinations. How can I assist you today?");
+        }, 500);
+    }
+    
+    async sendMessage() {
+        const message = this.messageInput.value.trim();
+        if (!message) return;
+        
+        this.addUserMessage(message);
+        this.messageInput.value = '';
+        
+        // Show typing indicator
+        this.showTypingIndicator();
+        
+        try {
+            // First try our local knowledge base
+            let response = generateResponse(message);
+            
+            // If the local response is generic, try Gemini API
+            if (response.includes("I'm sorry, I don't have specific information")) {
+                response = await GeminiAPI.generateResponse(`As a travel expert for India, answer this travel question: ${message}`);
+            }
+            
+            this.addBotMessage(response);
+        } catch (error) {
+            console.error('Error generating response:', error);
+            this.addBotMessage("I'm having trouble processing your request. Please try again later.");
+        }
+    }
+    
+    showTypingIndicator() {
+        const typingIndicator = document.createElement('div');
+        typingIndicator.className = 'typing-indicator';
+        typingIndicator.innerHTML = `
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        `;
+        this.chatContainer.appendChild(typingIndicator);
+        this.chatContainer.scrollTop = this.chatContainer.scrollHeight;
+        
+        // Remove after 3 seconds if still there
+        setTimeout(() => {
+            if (this.chatContainer.contains(typingIndicator)) {
+                this.chatContainer.removeChild(typingIndicator);
+            }
+        }, 3000);
+    }
+    
+    addUserMessage(text) {
+        this.addMessage(text, 'user');
+        this.currentConversation.push({
+            sender: 'user',
+            text: text,
+            time: new Date()
+        });
+        
+        if (this.currentConversation.length === 1) {
+            this.addToChatHistory(text);
+        }
+    }
+    
+    addBotMessage(text) {
+        this.addMessage(text, 'bot');
+        this.currentConversation.push({
+            sender: 'bot',
+            text: text,
+            time: new Date()
+        });
+        
+        if (this.currentConversation.length >= 2) {
+            this.conversations.push([...this.currentConversation]);
+            this.currentConversation = [];
+        }
+    }
+    
+    addMessage(text, sender) {
+        const messageElement = document.createElement('div');
+        messageElement.className = `message ${sender}-message`;
+        messageElement.textContent = text;
+        
+        const timestamp = document.createElement('div');
+        timestamp.className = 'timestamp';
+        timestamp.textContent = this.getCurrentTime();
+        
+        messageElement.appendChild(timestamp);
+        this.chatContainer.appendChild(messageElement);
+        this.chatContainer.scrollTop = this.chatContainer.scrollHeight;
+    }
+    
+    addToChatHistory(text) {
+        const historyItem = document.createElement('div');
+        historyItem.className = 'chat-item';
+        historyItem.textContent = text.length > 30 ? text.substring(0, 30) + '...' : text;
+        
+        historyItem.addEventListener('click', () => {
+            this.addBotMessage("You asked previously: " + text);
+        });
+        
+        this.chatHistory.appendChild(historyItem);
+        this.chatHistory.scrollTop = this.chatHistory.scrollHeight;
+    }
+    
+    getCurrentTime() {
+        const now = new Date();
+        return now.getHours().toString().padStart(2, '0') + ':' + 
+               now.getMinutes().toString().padStart(2, '0');
+    }
 }
 
-function appendMessage(sender, text, className) {
-  const chatBox = document.getElementById("chat-box");
-  const msgDiv = document.createElement("div");
-  msgDiv.classList.add(className);
-  msgDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
-  chatBox.appendChild(msgDiv);
-}
-
-function getBotResponse(msg) {
-  // 🌦️ Weather
-  if (msg.includes("weather") || msg.includes("temperature") || msg.includes("forecast")) {
-    return "I can help you plan based on weather. Use OpenWeather or AccuWeather for the latest forecast.";
-  }
-
-  // 🎉 Festivals
-  if (msg.includes("festival") || msg.includes("event") || msg.includes("celebration")) {
-    return "Check out Holi in India, Carnival in Brazil, or Oktoberfest in Germany! Want a country-specific suggestion?";
-  }
-
-  // 💰 Budget trips
-  if (msg.includes("budget") || msg.includes("cheap") || msg.includes("low cost")) {
-    return "Southeast Asia, Eastern Europe, and South America are great for budget travel! Use hostels & public transport.";
-  }
-
-  // 🧭 Destination suggestion
-  if (msg.includes("suggest") || msg.includes("destination") || msg.includes("where to go") || msg.includes("recommend")) {
-    return "For adventure, try New Zealand. For beaches, go to Thailand. For history, explore Rome!";
-  }
-
-  // 🕓 Best time to visit
-  if (msg.includes("best time") || msg.includes("season") || msg.includes("when to visit")) {
-    return "Europe is lovely in Spring (Apr–Jun), SE Asia in Winter (Nov–Feb). What country are you thinking of?";
-  }
-
-  // ✈️ Flights
-  if (msg.includes("flight") || msg.includes("airfare") || msg.includes("airline") || msg.includes("ticket")) {
-    return "Compare prices on Skyscanner, Google Flights, or Kayak. Book early for the best deals!";
-  }
-
-  // 🎒 Packing
-  if (msg.includes("pack") || msg.includes("packing") || msg.includes("carry")) {
-    return "Pack light: clothes, ID, power bank, meds, adapters, and check weather conditions.";
-  }
-
-  // 🛂 Visa & passport
-  if (msg.includes("visa") || msg.includes("passport") || msg.includes("documents")) {
-    return "Check the embassy website for your destination country. Visa rules vary widely!";
-  }
-
-  // 🔐 Safety
-  if (msg.includes("safe") || msg.includes("danger") || msg.includes("crime") || msg.includes("secure")) {
-    return "Stay safe: Avoid isolated places at night, use registered taxis, and keep emergency contacts handy.";
-  }
-
-  // 🏨 Accommodation
-  if (msg.includes("hotel") || msg.includes("stay") || msg.includes("hostel") || msg.includes("accommodation")) {
-    return "Try Booking.com, Hostelworld, or Airbnb for stays. Reviews help you find safe and comfortable places.";
-  }
-
-  // 🚗 Transport
-  if (msg.includes("transport") || msg.includes("cab") || msg.includes("bus") || msg.includes("train") || msg.includes("metro")) {
-    return "Use Google Maps for local transport, Uber/Ola for cabs, or Rome2Rio for multi-country travel planning.";
-  }
-
-  // 🍜 Food
-  if (msg.includes("food") || msg.includes("eat") || msg.includes("restaurant")) {
-    return "Try local cuisine! Use Google Reviews or Zomato/TripAdvisor for the best places to eat.";
-  }
-
-  // ⛰️ Adventure
-  if (msg.includes("adventure") || msg.includes("trek") || msg.includes("hike") || msg.includes("scuba")) {
-    return "You might love Rishikesh for rafting, Himalayas for trekking, or the Maldives for scuba diving!";
-  }
-
-  // 💕 Romantic / Honeymoon
-  if (msg.includes("honeymoon") || msg.includes("romantic") || msg.includes("couple")) {
-    return "Try Santorini (Greece), Udaipur (India), or Bora Bora (French Polynesia) for romantic getaways.";
-  }
-
-  // 👨‍👩‍👧‍👦 Family / Group trips
-  if (msg.includes("family") || msg.includes("group") || msg.includes("kids")) {
-    return "Visit amusement parks, zoos, or beaches. Dubai, Singapore, and Orlando are family-friendly destinations.";
-  }
-
-  // 🧍‍♀️ Solo travel
-  if (msg.includes("solo") || msg.includes("alone") || msg.includes("by myself")) {
-    return "Solo travel is empowering! Japan, Portugal, and Thailand are safe and great for solo adventurers.";
-  }
-
-  // 🧘 Culture & history
-  if (msg.includes("culture") || msg.includes("history") || msg.includes("heritage")) {
-    return "Explore Rome, Varanasi, Kyoto, or Cairo for deep cultural and historical experiences.";
-  }
-
-  // 🌲 Nature & wildlife
-  if (msg.includes("wildlife") || msg.includes("nature") || msg.includes("forest") || msg.includes("safari")) {
-    return "Try Kenya for safaris, Costa Rica for rainforests, or India’s Jim Corbett for tigers!";
-  }
-
-  // 💉 Travel insurance / health
-  if (msg.includes("insurance") || msg.includes("health") || msg.includes("vaccine")) {
-    return "Travel insurance is smart! Also check if you need vaccines for your destination before departure.";
-  }
-
-  // ⚖️ Laws & customs
-  if (msg.includes("law") || msg.includes("rule") || msg.includes("legal") || msg.includes("customs")) {
-    return "Always respect local laws and customs. Research cultural etiquette, dress codes, and legal restrictions.";
-  }
-
-  // ❓ General fallback
-  return "Hmm... I didn’t get that fully. Can you ask something about travel, weather, packing, or destinations?";
-}
+// Initialize the chatbot when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize Gemini API with your API key
+    GeminiAPI.init('YOUR_API_KEY');
+    
+    // Create TravelBuddy instance
+    const travelBuddy = new TravelBuddy();
+    
+    // Make generateResponse function available globally
+    window.generateResponse = function(userMessage) {
+        // Your existing generateResponse implementation
+        const lowerMessage = userMessage.toLowerCase();
+        
+        // Greetings
+        if (matchesPattern(lowerMessage, ['hi', 'hello', 'hey'])) {
+            return "Hello there! Ready to plan your next adventure in India? I am here to help you with Trip Planning.";
+        }
+        
+        // ... rest of your existing generateResponse function ...
+        
+        // If no specific pattern matches
+        return "I'm sorry, I don't have specific information about that. As a travel assistant, I can help with:\n" +
+               "- Destination recommendations\n" +
+               "- Budget travel tips\n" +
+               "- Hotel and transportation advice\n" +
+               "- Cultural information about India\n" +
+               "Could you please rephrase your question or ask about something else related to travel in India?";
+    };
+    
+    // Helper function to check if message matches any pattern
+    window.matchesPattern = function(message, patterns) {
+        return patterns.some(pattern => message.includes(pattern));
+    };
+});

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flavors of India - Culinary Heritage</title>
+    <style>
+        :root {
+            --primary-blue: #81e1be;
+            --secondary-blue: #5877a9;
+            --primary-green: #047857;
+            --secondary-green: #4eefba;
+            --white: #ffffff;
+            --light-bg: #f0fdf4;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-green));
+            color: var(--white);
+            padding: 2rem 0;
+            text-align: center;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        nav {
+            background-color: var(--primary-blue);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        nav ul {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+        
+        nav ul li {
+            margin: 0 15px;
+        }
+        
+        nav ul li a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        nav ul li a:hover {
+            background-color: var(--secondary-green);
+        }
+        
+        .hero {
+            background: url('https://i.pinimg.com/1200x/c9/91/24/c991241e996d391d80dadb4363532b5e.jpg') no-repeat center center/cover;
+            height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--white);
+            position: relative;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+        
+        section {
+            padding: 4rem 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary-blue);
+        }
+        
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .history-card {
+            background-color: var(--white);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .history-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .history-img {
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .history-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .history-card:hover .history-img img {
+            transform: scale(1.1);
+        }
+        
+        .history-content {
+            padding: 1.5rem;
+        }
+        
+        .history-content h3 {
+            color: var(--primary-green);
+            margin-bottom: 1rem;
+        }
+        
+        .regional-cuisines {
+            background-color: var(--secondary-blue);
+            color: var(--white);
+        }
+        
+        .cuisine-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .cuisine-card {
+            background-color: var(--white);
+            color: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .cuisine-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        
+        .cuisine-info {
+            padding: 1.5rem;
+        }
+        
+        .cuisine-info h3 {
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+        
+        .spices-section {
+            background-color: var(--light-bg);
+        }
+        
+        .spice-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+        
+        .spice-item {
+            background-color: var(--white);
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            width: 200px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .spice-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .spice-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+            border: 3px solid var(--secondary-green);
+        }
+        
+        .spice-item h3 {
+            color: var(--primary-green);
+            margin-bottom: 0.5rem;
+        }
+        
+        .recipe-finder {
+            background-color: var(--primary-green);
+            color: var(--white);
+            padding: 3rem 0;
+            text-align: center;
+        }
+        
+        .recipe-finder h2 {
+            margin-bottom: 1.5rem;
+        }
+        
+        .search-box {
+            display: flex;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .search-box input {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: none;
+            border-radius: 5px 0 0 5px;
+            font-size: 1rem;
+        }
+        
+        .search-box button {
+            background-color: var(--primary-blue);
+            color: var(--white);
+            border: none;
+            padding: 0 1.5rem;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        
+        .search-box button:hover {
+            background-color: #1e40af;
+        }
+        
+        footer {
+            background-color: var(--primary-blue);
+            color: var(--white);
+            text-align: center;
+            padding: 2rem 0;
+        }
+        
+        .social-links {
+            margin: 1rem 0;
+        }
+        
+        .social-links a {
+            color: var(--white);
+            margin: 0 10px;
+            font-size: 1.5rem;
+            transition: color 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            color: var(--secondary-green);
+        }
+        
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            nav ul li {
+                margin: 5px 0;
+            }
+            
+            .hero {
+                height: 50vh;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .search-box input {
+                border-radius: 5px;
+                margin-bottom: 10px;
+            }
+            
+            .search-box button {
+                border-radius: 5px;
+                padding: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Flavors of India</h1>
+            <p>Discover the rich culinary heritage of India spanning over 5000 years</p>
+        </div>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="#history">History</a></li>
+            <li><a href="#regional">Regional Cuisines</a></li>
+            <li><a href="#spices">Spices</a></li>
+        </ul>
+    </nav>
+    
+    <section class="hero">
+        <div class="hero-content">
+            <h2>A Melting Pot of Flavors</h2>
+            <p>Indian cuisine is a harmonious blend of diverse cultures, traditions, and ingredients that have evolved over millennia.</p>
+        </div>
+    </section>
+    
+    <section id="history">
+        <div class="container">
+            <h2 class="section-title">The History of Indian Cuisine</h2>
+            <div class="history-grid">
+                <div class="history-card">
+                    <div class="history-img">
+                        <img src="https://i.pinimg.com/736x/13/0f/43/130f43a52fb1674269194fd4ef54f4a2.jpg" alt="Ancient Indian Cuisine">
+                    </div>
+                    <div class="history-content">
+                        <h3>Ancient Roots (3000 BCE - 600 BCE)</h3>
+                        <p>The foundations of Indian cuisine were laid during the Indus Valley Civilization. Archaeological evidence shows early use of wheat, barley, and pulses. The Vedic period introduced rice, lentils, and dairy products like ghee and yogurt.</p>
+                    </div>
+                </div>
+                
+                <div class="history-card">
+                    <div class="history-img">
+                        <img src="https://i.pinimg.com/1200x/44/42/a6/4442a6467eeb4d032a5610ea7ada9a30.jpg" alt="Medieval Indian Cuisine">
+                    </div>
+                    <div class="history-content">
+                        <h3>Medieval Influences (600 CE - 1700 CE)</h3>
+                        <p>The Mughal Empire brought Persian influences, introducing rich gravies, pilafs, and kebabs. The Portuguese introduced chili peppers, potatoes, and tomatoes from the New World, revolutionizing Indian cooking.</p>
+                    </div>
+                </div>
+                
+                <div class="history-card">
+                    <div class="history-img">
+                        <img src="https://i.pinimg.com/originals/fb/8d/f3/fb8df391165d1cfe96564274c00861b3.png" alt="Modern Indian Cuisine">
+                    </div>
+                    <div class="history-content">
+                        <h3>Modern Era (1700 CE - Present)</h3>
+                        <p>British colonial rule introduced tea cultivation and baking techniques. Post-independence, regional cuisines gained national prominence. Today, Indian cuisine continues to evolve while maintaining its traditional roots.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="regional" class="regional-cuisines">
+        <div class="container">
+            <h2 class="section-title">Regional Diversity</h2>
+            <div class="cuisine-grid">
+                <div class="cuisine-card">
+                    <img src="https://i.pinimg.com/1200x/5d/e3/9d/5de39dc34c93c0bc4174a15014a6e8c0.jpg" alt="North Indian Cuisine">
+                    <div class="cuisine-info">
+                        <h3>North Indian</h3>
+                        <p>Characterized by dairy products like ghee and paneer, tandoori cooking, and wheat-based breads like naan and roti. Famous dishes include butter chicken, dal makhani, and kebabs.</p>
+                    </div>
+                </div>
+                
+                <div class="cuisine-card">
+                    <img src="https://i.pinimg.com/736x/a2/60/99/a260995638f3e959468bc331e9f05894.jpg" alt="South Indian Cuisine">
+                    <div class="cuisine-info">
+                        <h3>South Indian</h3>
+                        <p>Known for its rice-based dishes, coconut, and tamarind flavors. Includes dosas, idlis, vadas, and sambar. Hyderabadi biryani is a notable Mughal-influenced dish from the region.</p>
+                    </div>
+                </div>
+                
+                <div class="cuisine-card">
+                    <img src="https://i.pinimg.com/1200x/60/6a/14/606a14570601e7d62a4af7edb534f86e.jpg" alt="East Indian Cuisine">
+                    <div class="cuisine-info">
+                        <h3>East Indian</h3>
+                        <p>Features fish, rice, and mustard oil. Bengali cuisine is famous for its sweets like rasgulla and sandesh. Odisha and Bihar have unique culinary traditions with simple yet flavorful dishes.</p>
+                    </div>
+                </div>
+                
+                <div class="cuisine-card">
+                    <img src="https://i.pinimg.com/736x/be/97/23/be9723734e5dea3946ded1c1c3c351b2.jpg" alt="West Indian Cuisine">
+                    <div class="cuisine-info">
+                        <h3>West Indian</h3>
+                        <p>Includes Gujarati, Maharashtrian, and Goan cuisines. Varies from sweet Gujarati dishes to spicy Goan vindaloo. Mumbai's street food culture is world-renowned.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="spices" class="spices-section">
+        <div class="container">
+            <h2 class="section-title">The Spice Palette of India</h2>
+            <p style="text-align: center; max-width: 800px; margin: 0 auto 2rem;">Indian cuisine is renowned for its sophisticated use of spices, creating complex flavor profiles that vary by region.</p>
+            
+            <div class="spice-list">
+                <div class="spice-item">
+                    <img src="https://i.pinimg.com/736x/d2/08/40/d208403ee2b1e1118a0ace0e3065c639.jpg" alt="Turmeric">
+                    <h3>Turmeric</h3>
+                    <p>The golden spice with anti-inflammatory properties</p>
+                </div>
+                
+                <div class="spice-item">
+                    <img src="https://i.pinimg.com/1200x/26/23/f9/2623f98fe270a60a849765a4a191dcad.jpg" alt="Cumin">
+                    <h3>Cumin</h3>
+                    <p>Earthy, warm flavor used whole or ground</p>
+                </div>
+                
+                <div class="spice-item">
+                    <img src="https://i.pinimg.com/1200x/64/70/21/64702155ec10fef1da8df90bd2dcde17.jpg" alt="Coriander">
+                    <h3>Coriander</h3>
+                    <p>Both seeds and fresh leaves are widely used</p>
+                </div>
+                
+                <div class="spice-item">
+                    <img src="https://i.pinimg.com/1200x/62/81/34/62813419dc1628de0b7858fff4b8b3bb.jpg" alt="Cardamom">
+                    <h3>Cardamom</h3>
+                    <p>The "Queen of Spices" used in sweets and savory dishes</p>
+                </div>
+                
+                <div class="spice-item">
+                    <img src="https://i.pinimg.com/736x/50/c6/ce/50c6ce9cbf24ba2d906800c9fa21d365.jpg" alt="Mustard Seeds">
+                    <h3>Mustard Seeds</h3>
+                    <p>Essential in Bengali and South Indian cooking</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    
+    
+    <footer id="about">
+        <div class="container">
+            <h3>Flavors of India</h3>
+            <p>Preserving and promoting India's rich culinary heritage</p>
+            
+            <div class="social-links">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-pinterest"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+            </div>
+            
+            <p>&copy; 2023 Flavors of India. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    <!-- Font Awesome for icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</body>
+</html>

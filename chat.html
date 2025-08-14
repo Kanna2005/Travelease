@@ -251,6 +251,16 @@
             </button>
         </div>
     </div>
+    
+     <!-- Add these script tags before the closing body tag -->
+    <script src="gemini.js"></script>
+    <script src="script.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Your existing script content...
+        });
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -522,7 +532,7 @@
                            "Processing usually takes 72 hours.";
                 }
                 
-                // Best time to visit
+                // Best time , to visit
                 if (matchesPattern(lowerMessage, ['best time', 'when to visit', 'season',])) {
                     return "India has diverse climates:\n" +
                            "North (Himalayas): May-Oct (summer), Dec-Feb (snow)\n" +
@@ -630,7 +640,7 @@
                   }
 
                // 2. Best vacation spots
-                  if (matchesPattern(lowerMessage, ['best places south india', 'vacation spots south', 'tourist places south india'])) {
+                  if (matchesPattern(lowerMessage, ['best places in south india', 'vacation spots south', 'tourist places south india'])) {
                 return "Top vacation destinations in South India:\n" +
                        "- Kerala Backwaters (houseboat stays)\n" +
                        "- Goa Beaches (Portuguese influence)\n" +
@@ -745,4 +755,5 @@
         });
     </script>
 </body>
+
 </html>

@@ -16,7 +16,6 @@
       <input type="email" placeholder="Email" required />
       <input type="password" placeholder="Password" required />
       <div class="login-options">
-        <a href="#" class="forgot">Forgot password?</a>
         <label class="remember">
           <input type="checkbox" />
           <span class="switch"></span>
@@ -33,15 +32,10 @@
         Continue with Google
       </button>
 
-      <p class="signup">Don't have an account? <a href="#">Sign up</a></p>
     </form>
   </div>
 
-  <script>
-    function loginUser(e) {
-      e.preventDefault();
-      window.location.href = "index.html"; // Redirect to homepage after login
-    }
-  </script>
+ <script type="module" src="login.js" defer></script>
+
 </body>
 </html>
