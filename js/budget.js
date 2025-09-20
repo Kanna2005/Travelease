@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         expenses.forEach((expense, index) => {
             total += parseFloat(expense.amount);
-            
+           a 
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${formatDate(expense.date)}</td>

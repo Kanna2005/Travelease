@@ -14,7 +14,7 @@
     }
     .feature-card {
       text-align: center;
-      background: white;
+      background: rgb(255, 255, 255);
       border-radius: 20px;
       padding: 20px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -36,15 +36,15 @@
       </a>
     </div>
     <nav>
-      <a href="chat.html">Explore</a>
-      <a href="login.html" class="login-btn">Login</a>
+      <a href="explore.html">Explore</a>
+      <a href="#" id="auth-button" class="login-btn">Login</a>
     </nav>
   </header>
 
   <div class="overlay">
     <header>
       <h1>🌍 Travel Buddy</h1>
-      <p>Your AI-powered travel planner</p>
+      <p>Your AI-powered trip planner</p>
     </header>
 
     <section class="features">
@@ -64,11 +64,11 @@
         </div>
       </a>
 
-      <a href="chat.html">
+      <a href="places.html">
         <div class="feature-card">
           <i class="fas fa-robot fa-2x"></i>
-          <h3>Smart Q&A</h3>
-          <p>Ask anything. Let the AI guide your trip instantly.</p>
+          <h3>Places and region </h3>
+          <p>Explore them from North-South to east-west</p>
         </div>
       </a>
 
@@ -99,10 +99,57 @@
 
     <div class="cta">
       <a href="chat.html" class="start-btn">Start Planning Now</a>
-           <!-- Add these script tags before the closing body tag -->
-    <script src="gemini.js"></script>
-    <script src="script.js"></script>
     </div>
   </div>
+
+  <!-- Add these script tags before the closing body tag -->
+  <script src="js/gemini.js"></script>
+  <script src="js/script.js"></script>
+  
+  <!-- Logout functionality script -->
+  <script>
+    // Function to check if user is logged in
+    function checkAuthStatus() {
+      // Check if user data exists in localStorage (adjust based on your implementation)
+      const userEmail = localStorage.getItem('userEmail');
+      const isLoggedIn = localStorage.getItem('isLoggedIn');
+      
+      const authButton = document.getElementById('auth-button');
+      
+      if (userEmail && isLoggedIn === 'true') {
+        // User is logged in - show logout button
+        authButton.textContent = 'Logout';
+        authButton.href = '#';
+        authButton.onclick = handleLogout;
+      } else {
+        // User is not logged in - show login button
+        authButton.textContent = 'Login';
+        authButton.href = 'login.html';
+        authButton.onclick = null;
+      }
+    }
+    
+    // Function to handle logout
+    function handleLogout(e) {
+      e.preventDefault();
+      
+      // Clear authentication data from localStorage
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('authToken');
+      
+      // Alternatively, if using sessionStorage:
+      sessionStorage.removeItem('userEmail');
+      sessionStorage.removeItem('isLoggedIn');
+      sessionStorage.removeItem('authToken');
+      
+      // Redirect to login page or refresh the current page
+      window.location.href = 'login.html';
+      // Alternatively: window.location.reload();
+    }
+    
+    // Check authentication status when page loads
+    document.addEventListener('DOMContentLoaded', checkAuthStatus);
+  </script>
 </body>
 </html>

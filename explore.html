@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incredible India Travel Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #3c8aff 0%, #2277ff 100%);
+            color: #000000;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            color: #031c6e;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            color: #ffffff;
+            margin-bottom: 30px;
+        }
+        
+        .hero {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1524492412937-b28074a5d7da?ixlib=rb-4.0.3') no-repeat center center/cover;
+            height: 450px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .hero-content {
+            max-width: 700px;
+            padding: 20px;
+        }
+        
+        .hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: #33adff;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            background: #ffffff;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.2rem;
+            color: #ffffff;
+            margin: 40px 0 30px;
+            position: relative;
+        }
+        
+        .section-title:after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: #ffffff;
+            margin: 10px auto;
+            border-radius: 2px;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .feature-img {
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .feature-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .feature-card:hover .feature-img img {
+            transform: scale(1.1);
+        }
+        
+        .feature-content {
+            padding: 20px;
+        }
+        
+        .feature-content h3 {
+            color: #ffffff;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+        
+        .testimonials {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+        
+        .testimonial {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 20px;
+            position: relative;
+            padding: 0 20px;
+        }
+        
+        .testimonial-text:before, .testimonial-text:after {
+            content: '"';
+            font-size: 3rem;
+            color: #277df7;
+            position: absolute;
+            opacity: 0.3;
+        }
+        
+        .testimonial-text:before {
+            top: -15px;
+            left: 0;
+        }
+        
+        .testimonial-text:after {
+            bottom: -30px;
+            right: 0;
+        }
+        
+        .testimonial-user {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 15px;
+        }
+        
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .user-info h4 {
+            color: #138808;
+            margin-bottom: 5px;
+        }
+        
+        .faq {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 50px;
+        }
+        
+        .faq-item {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        
+        .faq-question {
+            font-size: 1.2rem;
+            color: #138808;
+            margin-bottom: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .faq-answer {
+            color: #666;
+            display: none;
+        }
+        
+        .faq-answer.show {
+            display: block;
+        }
+        
+        .feedback-form {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 50px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #138808;
+            font-weight: bold;
+        }
+        
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+        }
+        
+        .submit-btn {
+            background: #FF9933;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+        
+        .submit-btn:hover {
+            background: #138808;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #ffffff;
+            border-top: 1px solid #ddd;
+            margin-top: 30px;
+        }
+        
+        .social-icons {
+            margin-bottom: 20px;
+        }
+        
+        .social-icons a {
+            color: #ffffff;
+            font-size: 1.5rem;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+        }
+        
+        .social-icons a:hover {
+            color: #000000;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hero {
+                height: 350px;
+            }
+            
+            .hero h2 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-route"></i>
+            </div>
+            <h1>Incredible India Travel Assistant</h1>
+            <p class="tagline">Your personal guide to exploring the diverse beauty of India</p>
+        </header>
+        
+        <section class="hero">
+            <div class="hero-content">
+                <h2>Discover the Magic of India</h2>
+                <p>From the snowy Himalayas to the sunny beaches of Goa, from vibrant cities to serene villages - experience India like never before with our intelligent travel assistant.</p>
+                <a href="#" class="cta-button">Start Your Journey</a>
+            </div>
+        </section>
+        
+        <h2 class="section-title">How It Works</h2>
+        <section class="features">
+            <div class="feature-card">
+                <div class="feature-img">
+                    <img src="https://images.unsplash.com/photo-1532664189809-02133fee698d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Ask Questions">
+                </div>
+                <div class="feature-content">
+                    <h3>Ask Travel Questions</h3>
+                    <p>Get instant answers to all your travel queries - best time to visit, places to see, food to try, and more.</p>
+                </div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-img">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDAdkhNDNqwv5ChItMoiEFw0GjnhVxDS3yjQ&s.jpg" alt="Personalized Recommendations">
+                </div>
+                <div class="feature-content">
+                    <h3>Personalized Recommendations</h3>
+                    <p>Receive tailored suggestions based on your preferences, budget, and travel style.</p>
+                </div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-img">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRW64FYwaWJ8Evj5Lp0fcn50dV2ZzoKeud4rg&s.jpg" alt="Local Insights">
+                </div>
+                <div class="feature-content">
+                    <h3>Local Insights</h3>
+                    <p>Discover hidden gems and local favorites that only insiders know about.</p>
+                </div>
+            </div>
+        </section>
+        
+        <h2 class="section-title">Traveler Experiences</h2>
+        <section class="testimonials">
+            <div class="testimonial">
+                <div class="testimonial-text">
+                    This travel chatbot made my trip to Rajasthan incredible! It suggested the best local eateries in Jaipur and helped me find offbeat places that weren't crowded with tourists.
+                </div>
+                <div class="testimonial-user">
+                    <div class="user-avatar">
+                        <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Sarah Johnson">
+                    </div>
+                    <div class="user-info">
+                        <h4>Sarah Johnson</h4>
+                        <p>UK Traveler</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="testimonial">
+                <div class="testimonial-text">
+                    As a solo female traveler, I felt safe and well-informed using this chatbot. It gave me great advice on cultural norms and how to dress appropriately at religious sites.
+                </div>
+                <div class="testimonial-user">
+                    <div class="user-avatar">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Maria Rodriguez">
+                    </div>
+                    <div class="user-info">
+                        <h4>Maria Rodriguez</h4>
+                        <p>Spain Traveler</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="testimonial">
+                <div class="testimonial-text">
+                    The chatbot helped me plan my golden triangle tour efficiently, suggesting the optimal route and saving me both time and money. Highly recommend!
+                </div>
+                <div class="testimonial-user">
+                    <div class="user-avatar">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="David Chen">
+                    </div>
+                    <div class="user-info">
+                        <h4>David Chen</h4>
+                        <p>Australia Traveler</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <section class="faq">
+            <div class="faq-item">
+                <div class="faq-question">
+                    How do I get started with the travel chatbot? <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    Simply open the chat interface and type your travel question. You can ask about destinations, accommodations, transportation, or anything related to travel in India.
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    Can the chatbot help with hotel bookings? <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    While our chatbot doesn't directly handle bookings, it can recommend the best areas to stay, suggest specific hotels based on your budget, and provide links to booking platforms.
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    Does the chatbot provide real-time information? <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    Yes, our chatbot can provide real-time information on weather, flight status, and current events. For other information, we regularly update our database to ensure accuracy.
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    Is the service completely free? <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    Absolutely! Our travel chatbot is completely free to use. We're here to help promote tourism in India and make travel planning easier for everyone.
+                </div>
+            </div>
+        </section>
+        
+        <h2 class="section-title">Share Your Experience</h2>
+        <section class="feedback-form">
+            <form id="travelFeedbackForm">
+                <div class="form-group">
+                    <label for="name">Your Name</label>
+                    <input type="text" id="name" placeholder="Enter your name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Your Feedback or Experience</label>
+                    <textarea id="message" placeholder="Tell us about your experience using our travel chatbot or share your India travel story"></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">Submit Feedback</button>
+            </form>
+        </section>
+    </div>
+    
+    <footer>
+        <div class="social-icons">
+            <a href="#"><i class="fab fa-facebook"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
+        </div>
+        <p>Travel Assistant. All rights reserved.</p>
+        <p>Promoting tourism in India through technology</p>
+    </footer>
+
+    <script>
+        // FAQ toggle functionality
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const answer = question.nextElementSibling;
+                answer.classList.toggle('show');
+                
+                const icon = question.querySelector('i');
+                if (answer.classList.contains('show')) {
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                } else {
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                }
+            });
+        });
+        
+        // Form submission handling
+        document.getElementById('travelFeedbackForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thank you for your feedback! We appreciate you taking the time to share your experience with us.');
+            this.reset();
+        });
+        
+        // Simple animation on scroll
+        function animateOnScroll() {
+            const elements = document.querySelectorAll('.feature-card, .testimonial, .faq-item');
+            
+            elements.forEach(element => {
+                const position = element.getBoundingClientRect().top;
+                const screenPosition = window.innerHeight / 1.3;
+                
+                if (position < screenPosition) {
+                    element.style.opacity = 1;
+                    element.style.transform = 'translateY(0)';
+                }
+            });
+        }
+        
+        // Set initial state for animation
+        document.querySelectorAll('.feature-card, .testimonial, .faq-item').forEach(element => {
+            element.style.opacity = 0;
+            element.style.transform = 'translateY(20px)';
+            element.style.transition = 'all 0.5s ease';
+        });
+        
+        window.addEventListener('scroll', animateOnScroll);
+        // Initial call in case elements are already in view
+        window.addEventListener('load', animateOnScroll);
+    </script>
+</body>
+</html>

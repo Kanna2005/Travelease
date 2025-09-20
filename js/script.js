@@ -1,173 +1,199 @@
-// script.js - Main chatbot functionality
-class TravelBuddy {
-    constructor() {
-        this.chatContainer = document.getElementById('chatContainer');
-        this.messageInput = document.getElementById('messageInput');
-        this.sendButton = document.getElementById('sendButton');
-        this.chatHistory = document.getElementById('chatHistory');
-        this.sidebar = document.getElementById('sidebar');
-        this.backButton = document.getElementById('backButton');
-        
-        this.conversations = [];
-        this.currentConversation = [];
-        
-        this.setupEventListeners();
-        this.showWelcomeMessage();
-    }
-    
-    setupEventListeners() {
-        this.sendButton.addEventListener('click', () => this.sendMessage());
-        this.messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.sendMessage();
-        });
-        this.backButton.addEventListener('click', () => {
-            this.sidebar.classList.toggle('open');
-        });
-    }
-    
-    showWelcomeMessage() {
-        setTimeout(() => {
-            this.addBotMessage("Hello! I'm TravelBuddy, your personal travel assistant for India. I can help you with travel plans, budget trips, hotel information, and details about Indian destinations. How can I assist you today?");
-        }, 500);
-    }
-    
-    async sendMessage() {
-        const message = this.messageInput.value.trim();
-        if (!message) return;
-        
-        this.addUserMessage(message);
-        this.messageInput.value = '';
-        
-        // Show typing indicator
-        this.showTypingIndicator();
-        
-        try {
-            // First try our local knowledge base
-            let response = generateResponse(message);
-            
-            // If the local response is generic, try Gemini API
-            if (response.includes("I'm sorry, I don't have specific information")) {
-                response = await GeminiAPI.generateResponse(`As a travel expert for India, answer this travel question: ${message}`);
-            }
-            
-            this.addBotMessage(response);
-        } catch (error) {
-            console.error('Error generating response:', error);
-            this.addBotMessage("I'm having trouble processing your request. Please try again later.");
-        }
-    }
-    
-    showTypingIndicator() {
-        const typingIndicator = document.createElement('div');
-        typingIndicator.className = 'typing-indicator';
-        typingIndicator.innerHTML = `
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-        `;
-        this.chatContainer.appendChild(typingIndicator);
-        this.chatContainer.scrollTop = this.chatContainer.scrollHeight;
-        
-        // Remove after 3 seconds if still there
-        setTimeout(() => {
-            if (this.chatContainer.contains(typingIndicator)) {
-                this.chatContainer.removeChild(typingIndicator);
-            }
-        }, 3000);
-    }
-    
-    addUserMessage(text) {
-        this.addMessage(text, 'user');
-        this.currentConversation.push({
-            sender: 'user',
-            text: text,
-            time: new Date()
-        });
-        
-        if (this.currentConversation.length === 1) {
-            this.addToChatHistory(text);
-        }
-    }
-    
-    addBotMessage(text) {
-        this.addMessage(text, 'bot');
-        this.currentConversation.push({
-            sender: 'bot',
-            text: text,
-            time: new Date()
-        });
-        
-        if (this.currentConversation.length >= 2) {
-            this.conversations.push([...this.currentConversation]);
-            this.currentConversation = [];
-        }
-    }
-    
-    addMessage(text, sender) {
-        const messageElement = document.createElement('div');
-        messageElement.className = `message ${sender}-message`;
-        messageElement.textContent = text;
-        
-        const timestamp = document.createElement('div');
-        timestamp.className = 'timestamp';
-        timestamp.textContent = this.getCurrentTime();
-        
-        messageElement.appendChild(timestamp);
-        this.chatContainer.appendChild(messageElement);
-        this.chatContainer.scrollTop = this.chatContainer.scrollHeight;
-    }
-    
-    addToChatHistory(text) {
-        const historyItem = document.createElement('div');
-        historyItem.className = 'chat-item';
-        historyItem.textContent = text.length > 30 ? text.substring(0, 30) + '...' : text;
-        
-        historyItem.addEventListener('click', () => {
-            this.addBotMessage("You asked previously: " + text);
-        });
-        
-        this.chatHistory.appendChild(historyItem);
-        this.chatHistory.scrollTop = this.chatHistory.scrollHeight;
-    }
-    
-    getCurrentTime() {
-        const now = new Date();
-        return now.getHours().toString().padStart(2, '0') + ':' + 
-               now.getMinutes().toString().padStart(2, '0');
-    }
+/*  FIREBASE SETUP */
+const firebaseConfig = {
+apiKey: "AIzaSyA98_LyFxLewhlIxMAaZ5UWdfDrwSSWgsU",
+    authDomain: "chat-fec5e.firebaseapp.com",
+    projectId: "chat-fec5e",
+    storageBucket: "chat-fec5e.firebasestorage.app",
+    messagingSenderId: "478788977340",
+    appId: "1:478788977340:web:b52062ebb340a3574046b9",
+    measurementId: "G-SJL74BT9WW"
+};
+
+// Initialize Firebase (safe if called once)
+if (typeof firebase !== "undefined" && (!firebase.apps || !firebase.apps.length)) {
+  firebase.initializeApp(firebaseConfig);
+}
+const db = (typeof firebase !== "undefined") ? firebase.firestore() : null;
+
+// Collection name (change if you like)
+const FIREBASE_COLLECTION = "chatMessages";
+
+// Save a single message to Firestore
+function saveMessageToFirebase(role, contentRaw, contentHtml) {
+  try {
+    if (!db) return; // SDK not loaded
+    const payload = {
+      chatId: typeof currentChatId !== "undefined" ? currentChatId : null,
+      role,                                // "user" | "assistant"
+      content: contentRaw,                 // plain text
+      contentHtml: contentHtml ?? contentRaw, // formatted HTML (kept for assistant)
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      clientTimestamp: Date.now()
+    };
+    return db.collection(FIREBASE_COLLECTION).add(payload)
+      .then(() => console.log("[Firestore] Message saved"))
+      .catch(err => console.error("[Firestore] Save error:", err));
+  } catch (e) {
+    console.error("[Firestore] Exception:", e);
+  }
+}
+/* Chatbot script function */
+const chatMessages = document.getElementById("chat-messages");
+const userInput = document.getElementById("user-input");
+const sendBtn = document.getElementById("send-btn");
+const chatHistoryList = document.getElementById("chat-history-list");
+
+let currentChatId = null;
+let chats = JSON.parse(localStorage.getItem("travelChats")) || {};
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadChatHistory();
+  if (Object.keys(chats).length === 0) startNewChat();
+  else loadChat(Object.keys(chats).pop());
+
+  sendBtn.addEventListener("click", handleSendMessage);
+  userInput.addEventListener("keypress", e => { if (e.key === "Enter") handleSendMessage(); });
+});
+
+async function handleSendMessage() {
+  const message = userInput.value.trim();
+  if (!message) return;
+  userInput.value = "";
+
+  // Add + Save USER message
+  addMessage("user", message);
+  saveMessageToFirebase("user", message, message);
+
+  showTyping();
+
+  const response = await sendMessageToGemini(message);
+  removeTyping();
+
+  // Format assistant message for UI
+  const formatted = formatResponse(response);
+  addMessage("assistant", formatted);
+
+  // Save ASSISTANT message (raw + html)
+  saveMessageToFirebase("assistant", response, formatted);
+
+  saveChat();
+  updateChatHistoryList();
 }
 
-// Initialize the chatbot when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize Gemini API with your API key
-    GeminiAPI.init('YOUR_API_KEY');
-    
-    // Create TravelBuddy instance
-    const travelBuddy = new TravelBuddy();
-    
-    // Make generateResponse function available globally
-    window.generateResponse = function(userMessage) {
-        // Your existing generateResponse implementation
-        const lowerMessage = userMessage.toLowerCase();
-        
-        // Greetings
-        if (matchesPattern(lowerMessage, ['hi', 'hello', 'hey'])) {
-            return "Hello there! Ready to plan your next adventure in India? I am here to help you with Trip Planning.";
-        }
-        
-        // ... rest of your existing generateResponse function ...
-        
-        // If no specific pattern matches
-        return "I'm sorry, I don't have specific information about that. As a travel assistant, I can help with:\n" +
-               "- Destination recommendations\n" +
-               "- Budget travel tips\n" +
-               "- Hotel and transportation advice\n" +
-               "- Cultural information about India\n" +
-               "Could you please rephrase your question or ask about something else related to travel in India?";
+function formatResponse(text){
+  return text
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // bold
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")             // italic
+    .replace(/\n/g, "<br>");                          // line breaks 
+}
+
+function addMessage(role, content) {
+  const msg = document.createElement("div");
+  msg.className = `message ${role}`;
+  msg.innerHTML = `<div class="message-content">${content}</div>`;
+  chatMessages.appendChild(msg);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function showTyping() {
+  const typing = document.createElement("div");
+  typing.id = "typing";
+  typing.className = "message assistant";
+  typing.innerHTML = `<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+  chatMessages.appendChild(typing);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function removeTyping() { document.getElementById("typing")?.remove(); }
+
+function startNewChat() {
+  clearConversationHistory();
+  chatMessages.innerHTML = "";
+  currentChatId = "chat-" + Date.now();
+  chats[currentChatId] = { messages: [], title: "New Chat", timestamp: Date.now() };
+
+  const welcome = "👋 Hi! I'm your Travel Assistant. Where would you like to explore?";
+  addMessage("assistant", welcome);
+
+  // Save the welcome assistant message too
+  saveMessageToFirebase("assistant", welcome, welcome);
+
+  saveChat();
+}
+
+function saveChat() {
+  if (!currentChatId) return;
+  const msgs = [...chatMessages.querySelectorAll(".message")].map(el => ({
+    role: el.classList.contains("user") ? "user" : "assistant",
+    content: el.querySelector(".message-content").innerHTML //heep html format
+  }));
+  chats[currentChatId].messages = msgs;
+
+  // Set title from first user message
+  const firstUserMsg = msgs.find(m => m.role === "user");
+  if (firstUserMsg) {
+    chats[currentChatId].title = firstUserMsg.content.substring(0, 20) + "...";
+  }
+
+  chats[currentChatId].timestamp = Date.now();
+  localStorage.setItem("travelChats", JSON.stringify(chats));
+}
+
+function loadChat(id) {
+  currentChatId = id;
+  clearConversationHistory();
+  chatMessages.innerHTML = "";
+
+  chats[id].messages.forEach(m =>{
+    const content = m.role ==="assistant"? formatResponse(m.content): m.content;
+    addMessage(m.role, content);
+  });
+  setConversationHistory(chats[id].messages.map(m => ({ role: m.role === "user" ? "user" : "model", parts: [{ text: m.content }] })));
+}
+
+function loadChatHistory() {
+  chatHistoryList.innerHTML = "";
+  Object.keys(chats).sort((a, b) => chats[b].timestamp - chats[a].timestamp)
+    .forEach(id => {
+      const li = document.createElement("li");
+      li.textContent = chats[id].title;
+      li.onclick = () => loadChat(id);
+      chatHistoryList.appendChild(li);
+    });
+}
+
+function updateChatHistoryList() { loadChatHistory(); }
+function deleteAllChats() { chats = {}; localStorage.clear(); startNewChat(); }
+function goBack() { window.location.href = "index.html"; }
+
+async function sendMessageToGemini(userMessage) {
+  try {
+    const API_KEY = "AIzaSyDY2OyqPm2o9hE26eMQAtTJbd5pfGyKadA"; // replace with your real Gemini API key
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+
+    const body = {
+      contents: [
+        { role: "user", parts: [{ text: userMessage }] }
+      ]
     };
-    
-    // Helper function to check if message matches any pattern
-    window.matchesPattern = function(message, patterns) {
-        return patterns.some(pattern => message.includes(pattern));
-    };
-});
+
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+
+    const data = await response.json();
+
+    if (data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+      return data.candidates[0].content.parts[0].text;
+    } else {
+      console.error("Gemini API error:", data);
+      return "⚠ Sorry, I couldn't process your request. Try again.";
+    }
+
+  } catch (error) {
+    console.error("Fetch error:", error);
+    return "⚠ Sorry, something went wrong while connecting.";
+  }
+}

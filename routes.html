@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>India Route Optimizer</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --light: #f3f4f6;
+            --dark: #1f2937;
+            --danger: #ef4444;
+            --success: #10b981;
+            --border-radius: 12px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .india-badge {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        .input-section {
+            flex: 1;
+            min-width: 350px;
+            background: var(--light);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .map-section {
+            flex: 2;
+            min-width: 350px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+        
+        .waypoint {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+        
+        .waypoint input {
+            flex: 1;
+        }
+        
+        .remove-waypoint {
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .remove-waypoint:hover {
+            background: #dc2626;
+            transform: scale(1.05);
+        }
+        
+        .add-waypoint {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .add-waypoint:hover {
+            background: var(--primary-dark);
+        }
+        
+        .add-waypoint i {
+            margin-right: 8px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        button.optimize {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            flex: 1;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        button.optimize:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(16, 185, 129, 0.4);
+        }
+        
+        button.optimize:active {
+            transform: translateY(0);
+        }
+        
+        button.open-ors {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            flex: 1;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        button.open-ors:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(245, 158, 11, 0.4);
+        }
+        
+        button.open-ors:active {
+            transform: translateY(0);
+        }
+        
+        button i {
+            margin-right: 8px;
+        }
+        
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: var(--border-radius);
+        }
+        
+        .results {
+            margin-top: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .results h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light);
+        }
+        
+        .route-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .info-box {
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: var(--shadow);
+            border-top: 4px solid var(--primary);
+        }
+        
+        .info-box h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        
+        .info-box p {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+        
+        .directions {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 15px;
+            background: var(--light);
+            border-radius: var(--border-radius);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+        
+        .direction-step {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: flex-start;
+            transition: background 0.2s;
+        }
+        
+        .direction-step:hover {
+            background: rgba(37, 99, 235, 0.05);
+        }
+        
+        .direction-step:last-child {
+            border-bottom: none;
+        }
+        
+        .direction-icon {
+            margin-right: 12px;
+            color: var(--primary);
+            font-size: 18px;
+            min-width: 24px;
+            text-align: center;
+        }
+        
+        .direction-text {
+            flex: 1;
+        }
+        
+        .direction-distance {
+            color: var(--primary);
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background: var(--success);
+        }
+        
+        .notification.error {
+            background: var(--danger);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: white;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .input-section, .map-section {
+                width: 100%;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>India Route Optimizer</h1>
+                <p class="subtitle">Advanced route planning optimized for Indian roads</p>
+                <div class="india-badge">
+                    <i class="fas fa-map-marker-alt"></i> Optimized for India
+                </div>
+            </div>
+        </header>
+        
+        <div class="content">
+            <div class="input-section">
+                <div class="form-group">
+                    <label for="start"><i class="fas fa-play-circle"></i> Start Location</label>
+                    <input type="text" id="start" placeholder="Enter starting point" value="Mumbai">
+                </div>
+                
+                <div class="form-group">
+                    <label for="end"><i class="fas fa-flag-checkered"></i> End Location</label>
+                    <input type="text" id="end" placeholder="Enter destination" value="Pune">
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-map-pin"></i> Waypoints (Optional Stops)</label>
+                    <div id="waypoints-container">
+                        <div class="waypoint">
+                            <input type="text" class="waypoint-input" placeholder="Add a stop">
+                            <button class="remove-waypoint"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
+                    <button class="add-waypoint" id="add-waypoint"><i class="fas fa-plus"></i> Add Stop</button>
+                </div>
+                
+                <div class="form-group">
+                    <label for="profile"><i class="fas fa-car"></i> Transportation Mode</label>
+                    <select id="profile">
+                        <option value="driving-car">Car</option>
+                        <option value="cycling-regular">Bicycle</option>
+                        <option value="foot-walking">Walking</option>
+                        <option value="driving-hgv">Truck</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="optimization"><i class="fas fa-bolt"></i> Optimization Preference</label>
+                    <select id="optimization">
+                        <option value="fastest">Fastest Route</option>
+                        <option value="shortest">Shortest Distance</option>
+                        <option value="balanced">Balanced</option>
+                    </select>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="optimize" id="optimize">
+                        <i class="fas fa-route"></i> Optimize Route
+                    </button>
+                    <button class="open-ors" id="open-ors">
+                        <i class="fas fa-external-link-alt"></i> Open Advanced
+                    </button>
+                </div>
+                
+                <div class="loading" id="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Calculating optimal route...</p>
+                </div>
+                
+                <div class="results" id="results">
+                    <h3><i class="fas fa-info-circle"></i> Route Information</h3>
+                    <div class="route-info">
+                        <div class="info-box">
+                            <h4>Distance</h4>
+                            <p id="distance">-</p>
+                        </div>
+                        <div class="info-box">
+                            <h4>Duration</h4>
+                            <p id="duration">-</p>
+                        </div>
+                        <div class="info-box">
+                            <h4>Fuel Cost</h4>
+                            <p id="fuel">-</p>
+                        </div>
+                    </div>
+                    
+                    <h3><i class="fas fa-directions"></i> Turn-by-Turn Directions</h3>
+                    <div class="directions" id="directions">
+                        <p class="direction-step">Enter locations and click "Optimize Route" to get directions.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="map-section">
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+    
+    <footer>
+        <p>India Route Optimizer &copy; 2023 | Powered by OpenRouteService API</p>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Initialize map centered on India
+        const map = L.map('map').setView([20.5937, 78.9629], 5);
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // Add a marker for India
+        L.marker([20.5937, 78.9629]).addTo(map)
+            .bindPopup('<b>India</b><br>Route optimization optimized for Indian roads')
+            .openPopup();
+        
+        // Waypoints management
+        document.getElementById('add-waypoint').addEventListener('click', function() {
+            const waypointsContainer = document.getElementById('waypoints-container');
+            const waypointDiv = document.createElement('div');
+            waypointDiv.className = 'waypoint';
+            waypointDiv.innerHTML = `
+                <input type="text" class="waypoint-input" placeholder="Add a stop">
+                <button class="remove-waypoint"><i class="fas fa-times"></i></button>
+            `;
+            waypointsContainer.appendChild(waypointDiv);
+            
+            // Add event listener to remove button
+            waypointDiv.querySelector('.remove-waypoint').addEventListener('click', function() {
+                waypointDiv.remove();
+            });
+        });
+        
+        // Remove waypoint event delegation
+        document.getElementById('waypoints-container').addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-waypoint') || 
+                e.target.parentElement.classList.contains('remove-waypoint')) {
+                const button = e.target.classList.contains('remove-waypoint') ? 
+                    e.target : e.target.parentElement;
+                button.closest('.waypoint').remove();
+            }
+        });
+        
+        // Show notification function
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Open OpenRouteService in a new tab
+        document.getElementById('open-ors').addEventListener('click', function() {
+            const start = document.getElementById('start').value.trim();
+            const end = document.getElementById('end').value.trim();
+            
+            if (!start || !end) {
+                showNotification('Please enter both start and end locations', 'error');
+                return;
+            }
+            
+            // Open the OpenRouteService URL in a new tab
+            window.open('https://maps.openrouteservice.org/#/place/Mumbai%20BKC,Mumbai,MH,India/@72.864846,19.067725,15/data/55,130,32,102,9,96,46,4,32,246,5,112,29,128,76,12,226,1,113,64,78,8,41,128,52,33,175,128,134,56,12,96,5,150,184,28,101,249,37,62,57,106,0,54,101,69,128,140,1,56,1,208,0,96,6,192,29,130,64,38,0,172,197,57,32,14,101,134,80,128,28,98,0,179,170,214,32,47,177,0,94,112,224,5,183,239,36,55,0,158,108,176,128,6,236,192,136,70,136,88,225,176,224,36,170,8,100,32,250,64,0,0', '_blank');
+        });
+        
+        // Route optimization function
+        document.getElementById('optimize').addEventListener('click', function() {
+            const start = document.getElementById('start').value.trim();
+            const end = document.getElementById('end').value.trim();
+            const profile = document.getElementById('profile').value;
+            
+            if (!start || !end) {
+                showNotification('Please enter both start and end locations', 'error');
+                return;
+            }
+            
+            // Show loading state
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('distance').textContent = 'Calculating...';
+            document.getElementById('duration').textContent = 'Calculating...';
+            document.getElementById('fuel').textContent = 'Calculating...';
+            document.getElementById('directions').innerHTML = '<p class="direction-step">Calculating directions...</p>';
+            
+            // Get waypoints
+            const waypointInputs = document.querySelectorAll('.waypoint-input');
+            const waypoints = [];
+            waypointInputs.forEach(input => {
+                if (input.value.trim()) {
+                    waypoints.push(input.value.trim());
+                }
+            });
+            
+            // Indian cities with coordinates
+            const indianCities = {
+                'New Delhi': [28.6139, 77.2090],
+                'Mumbai': [19.0760, 72.8777],
+                'Bangalore': [12.9716, 77.5946],
+                'Chennai': [13.0827, 80.2707],
+                'Kolkata': [22.5726, 88.3639],
+                'Hyderabad': [17.3850, 78.4867],
+                'Pune': [18.5204, 73.8567],
+                'Agra': [27.1767, 78.0081],
+                'Jaipur': [26.9124, 75.7873],
+                'Lucknow': [26.8467, 80.9462],
+                'Ahmedabad': [23.0225, 72.5714],
+                'Chandigarh': [30.7333, 76.7794],
+                'Bhopal': [23.2599, 77.4126],
+                'Indore': [22.7196, 75.8577],
+                'Surat': [21.1702, 72.8311],
+                'Varanasi': [25.3176, 82.9739],
+                'Patna': [25.5941, 85.1376],
+                'Nagpur': [21.1458, 79.0882],
+                'Coimbatore': [11.0168, 76.9558],
+                'Kochi': [9.9312, 76.2673]
+            };
+            
+            // Check if locations are in our list of Indian cities
+            if (!indianCities[start] || !indianCities[end]) {
+                showNotification('Please enter valid Indian cities for start and end points', 'error');
+                document.getElementById('loading').style.display = 'none';
+                return;
+            }
+            
+            // Simulate API call with demo data for Indian routes
+            setTimeout(() => {
+                // In a real implementation, you would use the actual API response
+                const distance = '149 km';
+                const duration = '2 hours 45 mins';
+                const fuelCost = '₹1,045';
+                
+                document.getElementById('distance').textContent = distance;
+                document.getElementById('duration').textContent = duration;
+                document.getElementById('fuel').textContent = fuelCost;
+                
+                // Display demo directions for Indian route
+                const directions = [
+                    { instruction: 'Start from Mumbai, head east on WEH', distance: '5.2 km' },
+                    { instruction: 'Take exit toward Eastern Freeway', distance: '2.1 km' },
+                    { instruction: 'Merge onto Eastern Freeway', distance: '12.5 km' },
+                    { instruction: 'Continue onto NH 48', distance: '105 km' },
+                    { instruction: 'Take exit toward Pune City', distance: '8.3 km' },
+                    { instruction: 'Merge onto SB Road', distance: '4.7 km' },
+                    { instruction: 'Turn right onto JM Road', distance: '1.2 km' },
+                    { instruction: 'Continue straight onto FC Road', distance: '0.8 km' },
+                    { instruction: 'You have arrived at Pune', distance: '0 km' }
+                ];
+                
+                let directionsHTML = '';
+                directions.forEach((step, index) => {
+                    directionsHTML += `
+                        <div class="direction-step">
+                            <div class="direction-icon">${index + 1}</div>
+                            <div class="direction-text">${step.instruction}</div>
+                            <div class="direction-distance">${step.distance}</div>
+                        </div>
+                    `;
+                });
+                
+                document.getElementById('directions').innerHTML = directionsHTML;
+                
+                // Draw demo route on map for Indian cities
+                const routeCoords = [
+                    [19.0760, 72.8777],  // Mumbai
+                    [19.1000, 72.9000],  // Intermediate point
+                    [19.2000, 73.0000],  // Intermediate point
+                    [19.5000, 73.8000],  // Intermediate point
+                    [19.8000, 74.2000],  // Intermediate point
+                    [19.9000, 74.5000],  // Intermediate point
+                    [19.9500, 74.8000],  // Intermediate point
+                    [19.9800, 75.0000],  // Intermediate point
+                    [18.5204, 73.8567]   // Pune
+                ];
+                
+                // Clear existing routes
+                map.eachLayer(layer => {
+                    if (layer instanceof L.Polyline) {
+                        map.removeLayer(layer);
+                    }
+                });
+                
+                // Draw new route
+                const polyline = L.polyline(routeCoords, { 
+                    color: '#2563eb', 
+                    weight: 5,
+                    opacity: 0.8,
+                    dashArray: '5, 10'
+                }).addTo(map);
+                
+                // Add start and end markers
+                L.marker([19.0760, 72.8777]).addTo(map)
+                    .bindPopup('<b>Start</b><br>Mumbai')
+                    .openPopup();
+                
+                L.marker([18.5204, 73.8567]).addTo(map)
+                    .bindPopup('<b>End</b><br>Pune');
+                
+                // Fit map to route bounds
+                map.fitBounds(polyline.getBounds());
+                
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                
+                // Show success message
+                showNotification('Route optimized successfully!', 'success');
+                
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

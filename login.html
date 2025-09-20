@@ -4,38 +4,586 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login | Travelease</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600&display=swap">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #cbd1e1 0%, #0f50c0 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    .login-container {
+      background: rgb(119, 155, 255);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 450px;
+      padding: 40px;
+      text-align: center;
+    }
+    
+    h1 {
+      color: #000000;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    
+    .brand {
+      color: #1117cb;
+    }
+    
+    p {
+      color: #000000;
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
+    
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    input {
+      padding: 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: #223ede;
+    }
+    
+    .login-options {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .remember {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      color: #000000;
+    }
+    
+    .remember input {
+      display: none;
+    }
+    
+    .switch {
+      height: 20px;
+      width: 40px;
+      background: #ddd;
+      border-radius: 10px;
+      position: relative;
+      margin-right: 10px;
+      transition: background 0.3s;
+    }
+    
+    .switch:after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: white;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.3s;
+    }
+    
+    .remember input:checked + .switch {
+      background: #2711cb;
+    }
+    
+    .remember input:checked + .switch:after {
+      transform: translateX(20px);
+    }
+    
+    .forgot-password {
+      color: #2711cb;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    
+    .forgot-password:hover {
+      text-decoration: underline;
+    }
+    
+    .submit {
+      background: linear-gradient(135deg, #2711cb 0%, #2575fc 100%);
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(106, 17, 203, 0.4);
+    }
+    
+    .submit:active {
+      transform: translateY(0);
+    }
+    
+    .divider {
+      display: flex;
+      align-items: center;
+      color: #000000;
+      margin: 10px 0;
+    }
+    
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .divider span {
+      padding: 0 15px;
+    }
+    
+    .google-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: white;
+      border: 1px solid #ddd;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    .google-btn:hover {
+      background: #f5f5f5;
+    }
+    
+    .google-btn img {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .error-message {
+      color: #e74c3c;
+      background: #ffeaea;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+      text-align: left;
+      display: none;
+    }
+    
+    .error-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .error-title svg {
+      margin-right: 8px;
+    }
+    
+    .solution-box {
+      background: #f8f9fa;
+      border-left: 4px solid #2711cb;
+      padding: 12px;
+      margin-top: 15px;
+      border-radius: 4px;
+    }
+    
+    .solution-title {
+      font-weight: 600;
+      color: #2711cb;
+      margin-bottom: 8px;
+    }
+    
+    .solution-steps {
+      padding-left: 20px;
+      margin: 10px 0;
+    }
+    
+    .solution-steps li {
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    
+    .success-message {
+      color: #2ecc71;
+      background: #eaffea;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+      display: none;
+    }
+    
+    .loader {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 10px;
+      vertical-align: middle;
+      display: none;
+    }
+    
+    .signup-link {
+      margin-top: 20px;
+      color: #000000;
+    }
+    
+    .signup-link a {
+      color: #2711cb;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    
+    .signup-link a:hover {
+      text-decoration: underline;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    @media (max-width: 480px) {
+      .login-container {
+        padding: 30px 20px;
+      }
+      
+      .login-options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+    }
+  </style>
 </head>
 <body class="login-page">
   <div class="login-container">
     <h1>Welcome back to <span class="brand">Travelease</span></h1>
     <p>Plan your next trip smarter and faster with our AI-powered travel assistant.</p>
 
-    <form onsubmit="return loginUser(event)">
-      <input type="email" placeholder="Email" required />
-      <input type="password" placeholder="Password" required />
+    <form id="login-form">
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Password" required />
+      
       <div class="login-options">
         <label class="remember">
-          <input type="checkbox" />
+          <input type="checkbox" id="remember" />
           <span class="switch"></span>
-          <span class="label-text">Remember sign in details</span>
+          <span class="label-text">Remember me</span>
         </label>
+        <a href="#" class="forgot-password" id="forgot-password">Forgot password?</a>
       </div>
 
-      <button type="submit" class="login-btn">Log in</button>
+      <button type="submit" class="submit" id="submit">
+        <span class="loader" id="loader"></span>
+        <span id="submit-text">Login</span>
+      </button>
+
+      <div class="error-message" id="error-message"></div>
+      <div class="success-message" id="success-message"></div>
+
+      <div class="signup-link">
+        Don't have an account? <a href="#" id="signup-link">Sign up</a>
+      </div>
 
       <div class="divider"><span>OR</span></div>
 
-      <button class="google-btn">
+      <button type="button" class="google-btn" id="google-login">
         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo" />
         Continue with Google
       </button>
-
     </form>
   </div>
 
- <script type="module" src="login.js" defer></script>
+  <script type="module">
+    
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      signInWithPopup, 
+      GoogleAuthProvider,
+      setPersistence,
+      browserSessionPersistence,
+      browserLocalPersistence,
+      createUserWithEmailAndPassword,
+      sendPasswordResetEmail
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCC4fTx-FFEkv_7epf2OomvbXpLFJg8NLY",
+      authDomain: "login-system-f592a.firebaseapp.com",
+      projectId: "login-system-f592a",
+      storageBucket: "login-system-f592a.firebasestorage.app",
+      messagingSenderId: "515612597125",
+      appId: "1:515612597125:web:f95c428f07a2fd259742ec",
+      measurementId: "G-6FC22YXH11"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    // Get DOM elements
+    const loginForm = document.getElementById('login-form');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const rememberCheckbox = document.getElementById('remember');
+    const submitButton = document.getElementById('submit');
+    const submitText = document.getElementById('submit-text');
+    const loader = document.getElementById('loader');
+    const errorMessage = document.getElementById('error-message');
+    const successMessage = document.getElementById('success-message');
+    const googleLoginButton = document.getElementById('google-login');
+    const forgotPasswordLink = document.getElementById('forgot-password');
+    const signupLink = document.getElementById('signup-link');
+
+    // Check if user previously chose "Remember me"
+    const savedEmail = localStorage.getItem('rememberedEmail');
+    if (savedEmail) {
+      emailInput.value = savedEmail;
+      rememberCheckbox.checked = true;
+    }
+
+    // Handle form submission
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Get input values
+      const email = emailInput.value;
+      const password = passwordInput.value;
+      const rememberMe = rememberCheckbox.checked;
+      
+      // Show loading state
+      submitText.textContent = 'Logging in...';
+      loader.style.display = 'inline-block';
+      submitButton.disabled = true;
+      errorMessage.style.display = 'none';
+      
+      try {
+        // Set persistence based on "Remember me" selection
+        await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+        
+        // Sign in with email and password
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        // If "Remember me" is checked, save email to localStorage
+        if (rememberMe) {
+          localStorage.setItem('rememberedEmail', email);
+        } else {
+          localStorage.removeItem('rememberedEmail');
+        }
+        
+        // Show success message
+        showSuccess('Login successful! Redirecting to dashboard...');
+        
+        // Redirect to index.html after successful login
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1500);
+        
+      } catch (error) {
+        // Handle errors
+        let errorMsg = 'An error occurred during login.';
+        let detailedSolution = '';
+        
+        switch (error.code) {
+          case 'auth/invalid-email':
+            errorMsg = 'Invalid email address format.';
+            detailedSolution = 'Please check that you have entered a valid email address.';
+            break;
+          case 'auth/user-disabled':
+            errorMsg = 'This account has been disabled.';
+            detailedSolution = 'Please contact support for assistance.';
+            break;
+          case 'auth/user-not-found':
+            errorMsg = 'No account found with this email.';
+            detailedSolution = 'Please check your email or sign up for a new account.';
+            break;
+          case 'auth/wrong-password':
+            errorMsg = 'Incorrect password.';
+            detailedSolution = 'Please check your password or use the "Forgot password" link to reset it.';
+            break;
+          case 'auth/invalid-credential':
+            errorMsg = 'Invalid login credentials.';
+            detailedSolution = 'The email or password you entered is incorrect. Please check your credentials or reset your password if you\'ve forgotten it.';
+            break;
+          case 'auth/operation-not-allowed':
+            errorMsg = 'Email/password sign-in is not enabled.';
+            detailedSolution = 'Please check your Firebase configuration to enable email/password authentication.';
+            break;
+          default:
+            errorMsg = error.message;
+            detailedSolution = 'Please try again later or contact support if the problem persists.';
+        }
+        
+        showError(errorMsg, detailedSolution);
+      } finally {
+        // Reset button state
+        submitText.textContent = 'Login';
+        loader.style.display = 'none';
+        submitButton.disabled = false;
+      }
+    });
+
+    // Google sign-in handler
+    googleLoginButton.addEventListener('click', async () => {
+      try {
+        submitText.textContent = 'Redirecting to Google...';
+        loader.style.display = 'inline-block';
+        googleLoginButton.disabled = true;
+        errorMessage.style.display = 'none';
+        
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        
+        showSuccess('Google login successful! Redirecting to dashboard...');
+        
+        // Redirect to index.html after successful login
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1500);
+        
+      } catch (error) {
+        let errorMsg = error.message;
+        let detailedSolution = 'Please try again later or use email login instead.';
+        
+        if (error.code === 'auth/operation-not-allowed') {
+          errorMsg = 'Google sign-in is not enabled.';
+          detailedSolution = 'Please check your Firebase configuration to enable Google authentication.';
+        } else if (error.code === 'auth/popup-blocked') {
+          errorMsg = 'Popup window was blocked.';
+          detailedSolution = 'Please allow popups for this website and try again.';
+        }
+        
+        showError(errorMsg, detailedSolution);
+      } finally {
+        submitText.textContent = 'Login';
+        loader.style.display = 'none';
+        googleLoginButton.disabled = false;
+      }
+    });
+
+    // Forgot password handler
+    forgotPasswordLink.addEventListener('click', async (e) => {
+      e.preventDefault();
+      
+      const email = emailInput.value;
+      
+      if (!email) {
+        showError('Email required', 'Please enter your email address first to reset your password.');
+        return;
+      }
+      
+      try {
+        submitText.textContent = 'Sending reset email...';
+        loader.style.display = 'inline-block';
+        submitButton.disabled = true;
+        errorMessage.style.display = 'none';
+        
+        await sendPasswordResetEmail(auth, email);
+        showSuccess('Password reset email sent! Check your inbox.');
+      } catch (error) {
+        showError('Error sending reset email', 'Please make sure you entered a valid email address.');
+      } finally {
+        submitText.textContent = 'Login';
+        loader.style.display = 'none';
+        submitButton.disabled = false;
+      }
+    });
+
+    // Sign up handler (basic implementation)
+    signupLink.addEventListener('click', async (e) => {
+      e.preventDefault();
+      
+      const email = emailInput.value;
+      const password = passwordInput.value;
+      
+      if (!email || !password) {
+        showError('Email and password required', 'Please enter both email and password to create an account.');
+        return;
+      }
+      
+      try {
+        submitText.textContent = 'Creating account...';
+        loader.style.display = 'inline-block';
+        submitButton.disabled = true;
+        errorMessage.style.display = 'none';
+        
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        showSuccess('Account created successfully! You can now login.');
+      } catch (error) {
+        let errorMsg = 'Error creating account.';
+        
+        if (error.code === 'auth/email-already-in-use') {
+          errorMsg = 'Email already in use.';
+        } else if (error.code === 'auth/weak-password') {
+          errorMsg = 'Password is too weak.';
+        }
+        
+        showError(errorMsg, 'Please try a different email or stronger password.');
+      } finally {
+        submitText.textContent = 'Login';
+        loader.style.display = 'none';
+        submitButton.disabled = false;
+      }
+    });
+
+    // Helper functions for showing messages
+    function showError(message, solution) {
+      errorMessage.innerHTML = `
+        <div class="error-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          ${message}
+        </div>
+        <p>${solution}</p>
+      `;
+      errorMessage.style.display = 'block';
+      successMessage.style.display = 'none';
+    }
+
+    function showSuccess(message) {
+      successMessage.textContent = message;
+      successMessage.style.display = 'block';
+      errorMessage.style.display = 'none';
+    }
+  </script>
 </body>
 </html>
