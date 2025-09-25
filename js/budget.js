@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         expenses.forEach((expense, index) => {
             total += parseFloat(expense.amount);
-           a 
+            
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${formatDate(expense.date)}</td>
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const amount = parseFloat(document.getElementById('expenseAmount').value);
         const description = document.getElementById('expenseDescription').value;
         
-        if (!date || !category || isNaN(amount)) {
+        if (!date || !category || isNaN(amount) || amount <= 0) {
             alert('Please fill all required fields with valid data');
             return;
         }
@@ -104,11 +104,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Delete expense
     function deleteExpense(index) {
-        expenses.splice(index, 1);
-        saveExpenses();
-        renderExpenseTable();
-        updateBudgetSummary();
-        updateCharts();
+        if (index >= 0 && index < expenses.length) {
+            expenses.splice(index, 1);
+            saveExpenses();
+            renderExpenseTable();
+            updateBudgetSummary();
+            updateCharts();
+        }
     }
     
     // Clear all expenses
@@ -144,17 +146,15 @@ document.addEventListener('DOMContentLoaded', function() {
             budgetProgress.style.width = `${Math.min(percentage, 100)}%`;
             
             if (percentage > 90) {
-                budgetProgress.classList.remove('bg-success', 'bg-warning');
-                budgetProgress.classList.add('bg-danger');
+                budgetProgress.className = 'progress-bar bg-danger';
             } else if (percentage > 70) {
-                budgetProgress.classList.remove('bg-success', 'bg-danger');
-                budgetProgress.classList.add('bg-warning');
+                budgetProgress.className = 'progress-bar bg-warning';
             } else {
-                budgetProgress.classList.remove('bg-warning', 'bg-danger');
-                budgetProgress.classList.add('bg-success');
+                budgetProgress.className = 'progress-bar bg-success';
             }
         } else {
             budgetProgress.style.width = '0%';
+            budgetProgress.className = 'progress-bar bg-success';
         }
     }
     
@@ -169,6 +169,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         const rate = exchangeRates[fromCurrency];
+        if (!rate) {
+            alert('Invalid currency selected');
+            return;
+        }
+        
         const converted = amount * rate;
         convertedAmount.textContent = `${converted.toFixed(2)} INR`;
     });
@@ -180,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         categoryChart = new Chart(categoryCtx, {
             type: 'pie',
-            data: getChartData(),
+            data: getCategoryChartData(),
             options: {
                 responsive: true,
                 plugins: {
@@ -211,7 +216,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value + ' INR';
+                            }
+                        }
                     }
                 }
             }
@@ -220,15 +230,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Update charts
     function updateCharts() {
-        categoryChart.data = getChartData();
-        categoryChart.update();
-        
-        dailyChart.data = getDailyChartData();
-        dailyChart.update();
+        if (categoryChart && dailyChart) {
+            categoryChart.data = getCategoryChartData();
+            categoryChart.update();
+            
+            dailyChart.data = getDailyChartData();
+            dailyChart.update();
+        }
     }
     
     // Get data for category chart
-    function getChartData() {
+    function getCategoryChartData() {
         const categories = {};
         
         expenses.forEach(expense => {
@@ -238,17 +250,27 @@ document.addEventListener('DOMContentLoaded', function() {
             categories[expense.category] += parseFloat(expense.amount);
         });
         
+        const labels = Object.keys(categories);
+        const data = Object.values(categories);
+        
+        // If no expenses, show empty state
+        if (labels.length === 0) {
+            return {
+                labels: ['No expenses'],
+                datasets: [{
+                    data: [1],
+                    backgroundColor: ['#e9ecef']
+                }]
+            };
+        }
+        
         return {
-            labels: Object.keys(categories),
+            labels: labels,
             datasets: [{
-                data: Object.values(categories),
+                data: data,
                 backgroundColor: [
-                    '#FF6384',
-                    '#36A2EB',
-                    '#FFCE56',
-                    '#4BC0C0',
-                    '#9966FF',
-                    '#FF9F40'
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+                    '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
                 ]
             }]
         };
@@ -269,6 +291,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const sortedDates = Object.keys(dailyExpenses).sort();
         const sortedAmounts = sortedDates.map(date => dailyExpenses[date]);
         
+        // If no expenses, show empty state
+        if (sortedDates.length === 0) {
+            return {
+                labels: ['No data'],
+                datasets: [{
+                    label: 'Daily Expenses (INR)',
+                    data: [0],
+                    backgroundColor: '#e9ecef'
+                }]
+            };
+        }
+        
         return {
             labels: sortedDates,
             datasets: [{
@@ -281,12 +315,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Helper function to format date
     function formatDate(dateString) {
-        const options = { year: 'numeric', month: 'short', day: 'numeric' };
-        return new Date(dateString).toLocaleDateString(undefined, options);
+        try {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        } catch (error) {
+            return dateString; // Return original if date parsing fails
+        }
     }
     
     // Update budget when changed
     totalBudgetInput.addEventListener('change', updateBudgetSummary);
+    totalBudgetInput.addEventListener('input', updateBudgetSummary);
     
     // Set default date to today
     document.getElementById('expenseDate').value = new Date().toISOString().split('T')[0];
